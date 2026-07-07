@@ -108,6 +108,31 @@ The dataset builder will:
 
 ---
 
+
+## Required Pretrained Models
+
+### RTMPose
+
+This project uses **RTMPose-S** (COCO, 17 keypoints, 256×192 input).
+
+Download the official pretrained checkpoint from the MMPose Model Zoo:
+
+- https://github.com/open-mmlab/mmpose
+- https://mmpose.readthedocs.io/en/latest/model_zoo.html
+
+After downloading, rename the checkpoint to:
+
+```text
+rtmpose.pth
+```
+
+Place it in:
+
+```text
+backend/assets/rtmpose.pth
+```
+
+
 ## Training the Model
 
 After the dataset has been prepared, train the action recognition model:
@@ -168,7 +193,7 @@ The application will automatically load the trained model during inference.
 
 | Component | Version |
 |-----------|---------|
-| Python | 3.10 |
+| Python | 3.9 |
 | Node.js | 22.x |
 | PyTorch | 2.1.0 |
 | CUDA | 11.8 |
