@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardian Vision</title>
+    <link rel="stylesheet" href="icons/lineicons/lineicons.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="page-loader" id="pageLoader">
+        <div class="ring"></div>
+    </div>
+
+    <script>
+        if (localStorage.getItem("gv_logged_in") !== "true") {
+          window.location.replace("login.html");
+        }
+      </script>
+
+    <div class="container">
+        <aside id="sidebar">
+            <!-- <input type="checkbox" id="toggler"> -->
+            <label for="toggler" class="toggle-btn">
+                <!-- <i class="lni lni-dashboard-square-1"></i> -->
+                <img src="image/GV_Logo_3.svg" alt="logo" class="logo">
+                <span>Guardian Vision</span>
+            </label>
+            <ul class="sidebar-nav">
+                <li class="sidebar-item">
+                    <a href="index.html" class="sidebar-link">
+                        <i class="lni lni-dashboard-square-1"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="index.html" class="sidebar-link">
+                        <i class="lni lni-camera-1"></i>
+                        <span>Cameras</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i class="lni lni-search-1"></i>
+                        <span>Search</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i class="lni lni-database-2"></i>
+                        <span>Records</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i class="lni lni-bell-1"></i>
+                        <span>Notifications</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i class="lni lni-user-4"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i class="lni lni-gear-1"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <i class="lni lni-bug-1"></i>
+                        <span>Bugs</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link" onclick="logout()">
+                    <i class="lni lni-exit"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="main">
+            <div class="dashboard-navbar">
+                <form action="#">
+                    <div class="gv-header">
+                        <a href="#"><h2>Search</h2></a>
+                    </div>
+                </form>
+                <div class="form-content">
+                    <ul class="main-nav">
+                        <li class="user-link">
+                            <a href="#">
+                                <img src="image/account.png" alt="Profile" class="avatar">
+                            </a>
+                            <div class="user-link-dropdown">
+                                <a href="#" class="dropdown-item">Profile</a>
+                                <a href="#" class="dropdown-item" onclick="logout()">Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="content">
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+          localStorage.removeItem("gv_logged_in");
+          localStorage.removeItem("gv_user_email");
+          window.location.replace("login.html");
+        }
+      </script>
+
+
+</body>
+
+</html>

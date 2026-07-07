@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Users | Guardian Vision</title>
+
+  <!-- keep your existing stylesheet -->
+  <link rel="stylesheet" href="profilestyle.css">
+
+  <!-- ✅ Admin page overrides (fix dark/black text issue + add boxed layout) -->
+  <style>
+    :root{
+      --gv-bg: #0b1220;           /* deep navy */
+      --gv-card: #111a2e;         /* card background */
+      --gv-card-2: #0f172a;       /* inner panels */
+      --gv-text: #e6edf7;         /* main text */
+      --gv-muted: rgba(230,237,247,.75);
+      --gv-border: rgba(255,255,255,.12);
+      --gv-accent: #5aa7ff;       /* accent color */
+      --gv-danger: #ff5a7a;
+      --gv-ok: #34d399;
+      --gv-shadow: 0 12px 40px rgba(0,0,0,.35);
+      --gv-radius: 16px;
+    }
+
+    body{
+      margin:0;
+      min-height: 100vh;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(90,167,255,.20), transparent 55%),
+                  radial-gradient(900px 600px at 80% 20%, rgba(52,211,153,.12), transparent 55%),
+                  var(--gv-bg);
+      color: var(--gv-text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    /* Whole page box */
+    .admin-shell{
+      max-width: 980px;
+      margin: 28px auto;
+      padding: 0 16px;
+    }
+
+    .admin-card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid var(--gv-border);
+      border-radius: var(--gv-radius);
+      box-shadow: var(--gv-shadow);
+      padding: 18px 18px 16px 18px;
+      backdrop-filter: blur(6px);
+    }
+
+    .admin-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .admin-title{
+      margin:0;
+      font-size: 22px;
+      letter-spacing: .2px;
+    }
+
+    .admin-sub{
+      margin:6px 0 0 0;
+      color: var(--gv-muted);
+      font-size: 14px;
+    }
+
+    .admin-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .btn{
+      appearance:none;
+      border: 1px solid var(--gv-border);
+      background: rgba(255,255,255,.06);
+      color: var(--gv-text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: transform .05s ease, background .15s ease, border-color .15s ease;
+    }
+    .btn:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.18); }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      border-color: rgba(90,167,255,.45);
+      background: rgba(90,167,255,.18);
+    }
+    .btn.primary:hover{ background: rgba(90,167,255,.24); }
+
+    .btn.danger{
+      border-color: rgba(255,90,122,.45);
+      background: rgba(255,90,122,.14);
+    }
+    .btn.danger:hover{ background: rgba(255,90,122,.20); }
+
+    .btn.ghost{
+      background: transparent;
+    }
+
+    #out{
+      margin-top: 14px;
+    }
+
+    .notice{
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--gv-border);
+      background: rgba(0,0,0,.18);
+      color: var(--gv-muted);
+    }
+
+    .error{
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,90,122,.35);
+      background: rgba(255,90,122,.10);
+      color: #ffd2db;
+    }
+
+    /* User list cards */
+    .user-card{
+      border: 1px solid var(--gv-border);
+      border-radius: 14px;
+      padding: 12px;
+      margin: 10px 0;
+      background: rgba(0,0,0,.18);
+    }
+
+    .user-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap: wrap;
+    }
+
+    .user-main{
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .user-meta{
+      margin-top: 6px;
+      color: var(--gv-muted);
+      font-size: 13px;
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--gv-border);
+      background: rgba(255,255,255,.05);
+      font-size: 12px;
+      color: var(--gv-text);
+    }
+
+    .pill.ok{ border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.10); }
+    .pill.warn{ border-color: rgba(255,193,7,.35); background: rgba(255,193,7,.10); }
+
+    .user-buttons{
+      margin-top: 10px;
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+    }
+
+    .muted-small{
+      font-size: 12px;
+      color: var(--gv-muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .add-user-box{
+      margin: 14px 0 12px 0;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--gv-border);
+      background: rgba(0,0,0,.16);
+    }
+
+    .add-user-title{
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .form-grid{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .form-field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      color: var(--gv-muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .form-field input,
+    .form-field select{
+      width:100%;
+      box-sizing:border-box;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--gv-border);
+      background: rgba(255,255,255,.07);
+      color: var(--gv-text);
+      outline: none;
+    }
+
+    .form-field select option{
+      background: #111a2e;
+      color: #e6edf7;
+    }
+
+    .check-row{
+      margin-top: 10px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color: var(--gv-muted);
+      font-size: 13px;
+    }
+
+    .add-actions{
+      margin-top: 12px;
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 720px){
+      .form-grid{ grid-template-columns: 1fr; }
+    }
+
+  </style>
+</head>
+<body>
+
+<script>
+  const token = (localStorage.getItem("gv_token") || "").trim();
+  if (!token) window.location.replace("login.html");
+</script>
+
+<div class="admin-shell">
+  <div class="admin-card">
+    <div class="admin-head">
+      <div>
+        <h2 class="admin-title">Admin: Users</h2>
+        <p class="admin-sub">Add, remove, reset passwords, and rotate recovery codes.</p>
+      </div>
+
+      <div class="admin-actions">
+        <button class="btn primary" onclick="toggleAddUser()">Add User</button>
+        <button class="btn primary" onclick="loadUsers()">Refresh</button>
+        <button class="btn ghost" onclick="back()">Back</button>
+      </div>
+    </div>
+
+
+
+    <div id="addUserBox" class="add-user-box" style="display:none;">
+      <div class="add-user-title">Add New User</div>
+      <div class="form-grid">
+        <label class="form-field">Full name
+          <input id="newFullName" type="text" placeholder="Example: Juan Dela Cruz">
+        </label>
+        <label class="form-field">Email / username
+          <input id="newEmail" type="email" placeholder="user@gv.com">
+        </label>
+        <label class="form-field">Role
+          <select id="newRole">
+            <option value="Security Personnel">Security Personnel</option>
+            <option value="System Administrator">System Administrator</option>
+            <option value="Staff">Staff</option>
+            <option value="User">User</option>
+          </select>
+        </label>
+        <label class="form-field">Temporary password
+          <input id="newPassword" type="password" placeholder="At least 8 characters">
+        </label>
+      </div>
+      <label class="check-row">
+        <input id="newMustChange" type="checkbox" checked>
+        Force user to change password on first login
+      </label>
+      <div class="add-actions">
+        <button class="btn primary" onclick="createUser()">Create User</button>
+        <button class="btn ghost" onclick="clearAddUserForm()">Clear</button>
+      </div>
+      <div class="muted-small">After creating a user, save the recovery code shown in the alert. It cannot be viewed again later.</div>
+    </div>
+
+    <div id="out" class="notice">Loading...</div>
+
+    <div class="muted-small">
+      Tip: After “Reset Password”, the user will be forced to change password on next login (must_change_pw = 1).
+    </div>
+  </div>
+</div>
+
+<script>
+  function backendBase() {
+    const ip = (localStorage.getItem("gv_server_ip") || "127.0.0.1").trim();
+    const port = (localStorage.getItem("gv_server_port") || "8766").trim();
+    return `http://${ip}:${port}`;
+  }
+  function authHeaders(extra) {
+    const h = Object.assign({}, extra || {});
+    h["Authorization"] = "Bearer " + (localStorage.getItem("gv_token") || "");
+    h["X-Client-ID"] = "GV-Electron";
+    return h;
+  }
+  function back() {
+    window.location.href = "profile.html";
+  }
+
+  function esc(x) {
+    return String(x ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#39;");
+  }
+
+
+
+  function toggleAddUser() {
+    const box = document.getElementById("addUserBox");
+    box.style.display = box.style.display === "none" ? "block" : "none";
+  }
+
+  function clearAddUserForm() {
+    document.getElementById("newFullName").value = "";
+    document.getElementById("newEmail").value = "";
+    document.getElementById("newRole").value = "Security Personnel";
+    document.getElementById("newPassword").value = "";
+    document.getElementById("newMustChange").checked = true;
+  }
+
+  async function createUser() {
+    const full_name = document.getElementById("newFullName").value.trim();
+    const email = document.getElementById("newEmail").value.trim().toLowerCase();
+    const role = document.getElementById("newRole").value.trim();
+    const password = document.getElementById("newPassword").value;
+    const must_change_pw = document.getElementById("newMustChange").checked ? 1 : 0;
+
+    if (!full_name) { alert("Full name is required."); return; }
+    if (!email || !email.includes("@")) { alert("Valid email is required."); return; }
+    if (!password || password.length < 8) { alert("Temporary password must be at least 8 characters."); return; }
+
+    const res = await fetch(`${backendBase()}/auth/admin/create_user`, {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ email, full_name, role, password, must_change_pw })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) {
+      alert(data.detail || "Create user failed");
+      return;
+    }
+
+    alert(
+      "User created successfully.\n\n" +
+      "Email: " + data.user.email + "\n" +
+      "Temporary password: " + password + "\n" +
+      "Recovery Code: " + data.recovery_code + "\n\n" +
+      "Save this recovery code now. It cannot be viewed again later."
+    );
+    clearAddUserForm();
+    document.getElementById("addUserBox").style.display = "none";
+    loadUsers();
+  }
+
+  async function loadUsers() {
+    const out = document.getElementById("out");
+    out.className = "notice";
+    out.innerHTML = "Loading...";
+
+    const res = await fetch(`${backendBase()}/auth/admin/users`, { headers: authHeaders() });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.ok) {
+      out.className = "error";
+      out.innerHTML = esc(data.detail || "Failed to load users (admin only).");
+      return;
+    }
+
+    const rows = data.items || [];
+    if (!rows.length) {
+      out.className = "notice";
+      out.innerHTML = "No users.";
+      return;
+    }
+
+    out.className = "";
+    out.innerHTML = rows.map(u => {
+      const must = Number(u.must_change_pw || 0);
+      const mustPill = must === 1
+        ? `<span class="pill warn">must_change_pw: 1</span>`
+        : `<span class="pill ok">must_change_pw: 0</span>`;
+
+      return `
+        <div class="user-card">
+          <div class="user-top">
+            <div>
+              <div class="user-main"><b>#${esc(u.id)}</b> — ${esc(u.full_name)} <span style="font-weight:600; color: rgba(230,237,247,.75);">(${esc(u.email)})</span></div>
+              <div class="user-meta">
+                <span class="pill">Role: ${esc(u.role)}</span>
+                ${mustPill}
+              </div>
+              <div class="muted-small">Created: ${esc(u.created_at)} • Updated: ${esc(u.updated_at)}</div>
+            </div>
+          </div>
+
+          <div class="user-buttons">
+            <button class="btn danger" onclick="resetPw(${Number(u.id)})">Reset Password</button>
+            <button class="btn primary" onclick="rotateRecovery(${Number(u.id)})">Rotate Recovery Code</button>
+            <button class="btn danger" onclick="deleteUser(${Number(u.id)})">Remove User</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  async function resetPw(userId) {
+    const pw = prompt("Enter NEW temporary password (min 6 chars):");
+    if (!pw) return;
+    if (pw.length < 6) { alert("Too short"); return; }
+
+    const res = await fetch(`${backendBase()}/auth/admin/reset_password`, {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ user_id: userId, new_password: pw, must_change_pw: 1 })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) {
+      alert(data.detail || "Reset failed");
+      return;
+    }
+    alert("Password reset OK. User must change password on next login.");
+    loadUsers();
+  }
+
+  async function rotateRecovery(userId) {
+    const res = await fetch(`${backendBase()}/auth/admin/rotate_recovery`, {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ user_id: userId })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) {
+      alert(data.detail || "Rotate failed");
+      return;
+    }
+
+    alert("NEW Recovery Code (save it now): " + data.recovery_code);
+  }
+
+  async function deleteUser(userId) {
+    const ok = confirm(
+      "Remove user #" + userId + "?\n\n" +
+      "This will permanently delete the account and log out that user from active sessions. This cannot be undone."
+    );
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`${backendBase()}/auth/admin/delete_user`, {
+        method: "POST",
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ user_id: Number(userId) })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        alert(data.detail || "Remove user failed");
+        return;
+      }
+
+      alert("User removed successfully.");
+      await loadUsers();
+    } catch (err) {
+      alert("Remove user failed: " + (err?.message || String(err)));
+    }
+  }
+
+  loadUsers();
+</script>
+
+</body>
+</html>

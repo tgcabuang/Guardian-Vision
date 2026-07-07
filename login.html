@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Form | Guardian Vision</title>
+  <link rel="stylesheet" href="loginstyle.css">
+</head>
+<body>
+  <div class="loader">
+    <div class="ring"></div>
+ </div>
+  <div class="container">
+    <div class="form-container">
+      <div class="form-blob">
+        <img src="image/GV_Logo_3.svg" alt="blob" class="blob-image blob-image--1">
+        <img src="image/GV_Logo_3.svg" alt="blob" class="blob-image blob-image--2">
+        <img src="image/GV_Logo_3.svg" alt="blob" class="blob-image blob-image--3">
+      </div>
+
+      <div class="form-header">
+        <p>Please enter your details</p>
+        <h1>Welcome Back!</h1>
+      </div>
+
+      <form class="form-box" id="loginForm">
+        <div class="input-group">
+          <input type="email" id="email" class="input-field" placeholder="" required>
+          <label for="email" class="floating-label">Email address</label>
+        </div>
+
+        <div class="input-group">
+          <input type="password" id="password" class="input-field" placeholder="" required>
+          <label for="password" class="floating-label">Password</label>
+          <div class="eye-icon" onclick="togglePassword()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye">
+              <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="input-group checkbox-group">
+          <div class="form-col remember-me">
+            <input type="checkbox" id="remember-me-checkbox" class="checkbox-field">
+            <label for="remember-me-checkbox">Remember me</label>
+          </div>
+          <div class="form-col">
+            <a href="forgot_password.html" class="form-link">Forgot password?</a>
+          </div>
+        </div>
+
+        <button type="submit" class="form-btn form-btn--submit">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const loader = document.querySelector(".loader");
+    const formContainer = document.querySelector(".form-container");
+
+    window.onload = function() {
+      setTimeout(function() {
+        loader.style.opacity = "0";
+        setTimeout(function() {
+          loader.style.display = "none";
+          formContainer.classList.add("animate-blobs");
+        }, 500);
+      }, 1500);
+    }
+
+    function togglePassword() {
+      const passwordInput = document.getElementById("password");
+      const eyeIcon = document.querySelector(".eye-icon");
+
+      if (passwordInput.type === "password"){
+        passwordInput.type = "text";
+        eyeIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off-icon lucide-eye-off">
+          <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/>
+          <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/>
+          <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/>
+          <path d="m2 2 20 20"/>
+        </svg>`;
+      } else {
+        passwordInput.type = "password";
+        eyeIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye">
+          <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>`;
+      }
+    }
+
+    function backendBase() {
+      const ip = (localStorage.getItem("gv_server_ip") || "127.0.0.1").trim();
+      const port = (localStorage.getItem("gv_server_port") || "8766").trim();
+      return `http://${ip}:${port}`;
+    }
+
+    function clearAuth() {
+      localStorage.removeItem("gv_logged_in");
+      localStorage.removeItem("gv_token");
+      localStorage.removeItem("gv_user_email");
+      localStorage.removeItem("gv_name");
+      localStorage.removeItem("gv_role");
+      localStorage.removeItem("gv_user_id");
+      localStorage.removeItem("gv_must_change_pw");
+      localStorage.removeItem("gv_remember_me");
+    }
+
+    // ✅ Auto-login only when Remember me was checked before.
+    // If Remember me was NOT checked, opening the app again clears the saved login state.
+    (function bootRedirectIfRemembered() {
+      const remembered = localStorage.getItem("gv_remember_me") === "true";
+      const loggedIn = localStorage.getItem("gv_logged_in") === "true";
+      const token = (localStorage.getItem("gv_token") || "").trim();
+
+      if (!remembered) {
+        clearAuth();
+        return;
+      }
+
+      // If token/login state is broken, clear it and stay on login page
+      if (!loggedIn || !token) {
+        clearAuth();
+        return;
+      }
+
+      const must = Number(localStorage.getItem("gv_must_change_pw") || "0");
+
+      if (must === 1) {
+        window.location.replace("profile.html");
+      } else {
+        window.location.replace("index.html");
+      }
+    })();
+
+    const loginForm = document.getElementById("loginForm");
+    loginForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const rememberMe = document.getElementById("remember-me-checkbox").checked;
+
+      try {
+        const res = await fetch(`${backendBase()}/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Client-ID": "GV-Electron"
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          throw new Error(data.detail || "Invalid email or password");
+        }
+
+        // Save auth + profile
+        // Remember me controls whether the app restores login after closing/reopening.
+        localStorage.setItem("gv_remember_me", rememberMe ? "true" : "false");
+        localStorage.setItem("gv_logged_in", "true");
+        localStorage.setItem("gv_token", data.token);
+
+        localStorage.setItem("gv_user_id", String(data.user?.id || ""));
+        localStorage.setItem("gv_user_email", data.user?.email || email);
+        localStorage.setItem("gv_name", data.user?.full_name || "");
+        localStorage.setItem("gv_role", data.user?.role || "");
+
+        // ✅ Must-change flag from backend
+        const mustChange = Number(data.must_change_pw || 0);
+        localStorage.setItem("gv_must_change_pw", String(mustChange));
+
+        if (mustChange === 1) {
+          alert("Your password was reset by admin. Please change your password now.");
+          window.location.replace("profile.html");
+        } else {
+          window.location.replace("index.html");
+        }
+      } catch (err) {
+        clearAuth();
+        alert(err?.message || String(err));
+      }
+    });
+  </script>
+
+</body>
+</html>

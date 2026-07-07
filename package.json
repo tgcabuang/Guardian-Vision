@@ -1,0 +1,56 @@
+{
+  "name": "guardian-vision",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "electron": "electron .",
+    "dist-dir": "electron-builder --win dir",
+    "dist-portable": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.guardianvision.capstone",
+    "productName": "Guardian Vision",
+    "icon": "image/app_icon.ico",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "*.html",
+      "*.css",
+      "*.js",
+      "image/**",
+      "Login/**",
+      "Font/**",
+      "icons/**",
+      "renderer/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "backend/build/server_ws.dist",
+        "to": "backend"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "image/app_icon.ico"
+    }
+  },
+  "devDependencies": {
+    "electron": "^39.2.7",
+    "electron-builder": "^24.13.3"
+  }
+}

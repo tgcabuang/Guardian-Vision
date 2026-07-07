@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardian Vision</title>
+    <link rel="stylesheet" href="icons/lineicons/lineicons.css">
+    <link rel="stylesheet" href="notifstyle.css">
+</head>
+<body>
+
+    <div class="page-loader" id="pageLoader">
+        <div class="ring"></div>
+    </div>
+
+    <!-- ✅ Token-based guard (not gv_logged_in) -->
+    <script>
+        if (!(localStorage.getItem("gv_token") || "").trim()) {
+          window.location.replace("login.html");
+        }
+    </script>
+
+    <div class="container">
+        <aside id="sidebar">
+            <label for="toggler" class="toggle-btn">
+                <img src="image/GV_Logo_3.svg" alt="logo" class="logo">
+                <span>Guardian Vision</span>
+            </label>
+            <ul class="sidebar-nav">
+                <li class="sidebar-item">
+                    <a href="index.html" class="sidebar-link">
+                        <i class="lni lni-dashboard-square-1"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="records.html" class="sidebar-link">
+                        <i class="lni lni-database-2"></i>
+                        <span>Records</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="notifications.html" class="sidebar-link active">
+                        <i class="lni lni-bell-1"></i>
+                        <span>Notifications</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="profile.html" class="sidebar-link">
+                        <i class="lni lni-user-4"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="settings.html" class="sidebar-link">
+                        <i class="lni lni-gear-1"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link" onclick="logout()">
+                    <i class="lni lni-exit"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="main">
+            <div class="dashboard-navbar">
+                <form action="#">
+                    <div class="gv-header">
+                        <a href="#"><h2>Notifications</h2></a>
+                    </div>
+                </form>
+                <div class="form-content">
+                    <ul class="main-nav">
+                        <li class="user-link">
+                            <a href="#">
+                                <img src="image/account.png" alt="Profile" class="avatar">
+                            </a>
+                            <div class="user-link-dropdown">
+                                <a href="profile.html" class="dropdown-item">Profile</a>
+                                <a href="#" class="dropdown-item" onclick="logout()">Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="notifications-header">
+                    <span class="notifications-title">Recent Notifications</span>
+                    <button class="clear-btn" onclick="clearAllNotifications()">Clear all</button>
+                </div>
+
+                <div class="notifications-wrapper" id="notificationsWrapper">
+                    <!-- ✅ filled dynamically -->
+                </div>
+
+                <div class="no-notifications" id="noNotifications">
+                    <i class="lni lni-bell-1"></i>
+                    <p>No notifications</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================
+        // AUTH / LOGOUT (clears token too)
+        // =========================================================
+        function clearAuth() {
+          localStorage.removeItem("gv_logged_in");
+          localStorage.removeItem("gv_token");
+          localStorage.removeItem("gv_user_email");
+          localStorage.removeItem("gv_name");
+          localStorage.removeItem("gv_role");
+          localStorage.removeItem("gv_user_id");
+        }
+
+        function backendHttpBase() {
+          const ip = (localStorage.getItem("gv_server_ip") || "127.0.0.1").trim();
+          const port = (localStorage.getItem("gv_server_port") || "8766").trim();
+          return `http://${ip}:${port}`;
+        }
+
+        async function logout() {
+          try {
+            const token = (localStorage.getItem("gv_token") || "").trim();
+            await fetch(`${backendHttpBase()}/auth/logout`, {
+              method: "POST",
+              headers: {
+                "Authorization": "Bearer " + token,
+                "X-Client-ID": "GV-Electron"
+              }
+            });
+          } catch {}
+
+          clearAuth();
+          window.location.replace("login.html");
+        }
+    </script>
+
+    <script>
+        // =========================================================
+        // CONFIG
+        // =========================================================
+        const DETECT_THRESH = 0.85;     // 85%
+        const STATUS_POLL_MS = 2000;    // camera offline polling
+        const MAX_NOTIFS = 200;         // cap stored notifs
+        const NOTIF_MERGE_GAP_MS = 10000; // merge repeated Punching/Kicking detections into one notification
+        const NOTIF_LABELS = ["punching", "kicking"];
+        const ACTION_ICONS = {
+            punching: "icons/notification/punch.png",
+            kicking: "icons/notification/kick.png"
+        };
+
+        // =========================================================
+        // BACKEND BASE
+        // =========================================================
+        function backendWsBase() {
+            const ip = (localStorage.getItem("gv_server_ip") || "127.0.0.1").trim();
+            const port = (localStorage.getItem("gv_server_port") || "8766").trim();
+            const token = (localStorage.getItem("gv_token") || "").trim();
+            return `ws://${ip}:${port}/ws?token=${encodeURIComponent(token)}&client_id=${encodeURIComponent("GV-Electron")}`;
+        }
+
+        // =========================================================
+        // DOM
+        // =========================================================
+        const wrapper = document.getElementById("notificationsWrapper");
+        const emptyState = document.getElementById("noNotifications");
+
+        function safeText(x) {
+            return String(x ?? "").replace(/[<>&"]/g, s => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;", "\"":"&quot;" }[s]));
+        }
+
+        // =========================================================
+        // STORAGE
+        // =========================================================
+        const LS_KEY = "gv_notifications_v1";
+
+        function loadNotifs() {
+            try {
+                const raw = localStorage.getItem(LS_KEY);
+                const arr = raw ? JSON.parse(raw) : [];
+                return Array.isArray(arr) ? arr : [];
+            } catch {
+                return [];
+            }
+        }
+        function saveNotifs(arr) {
+            try {
+                localStorage.setItem(LS_KEY, JSON.stringify(arr.slice(0, MAX_NOTIFS)));
+            } catch {}
+        }
+
+        let notifs = loadNotifs();
+
+        // =========================================================
+        // TIME FORMAT
+        // =========================================================
+        function relTime(ts) {
+            const diff = Date.now() - ts;
+            const s = Math.floor(diff / 1000);
+            if (s < 10) return "just now";
+            if (s < 60) return `${s}s ago`;
+            const m = Math.floor(s / 60);
+            if (m < 60) return `${m} min ago`;
+            const h = Math.floor(m / 60);
+            if (h < 24) return `${h} hr ago`;
+            const d = Math.floor(h / 24);
+            return `${d} day${d>1?"s":""} ago`;
+        }
+
+        // =========================================================
+        // NOTIFICATION CREATE (with basic de-dupe)
+        // =========================================================
+        function addNotif(n) {
+            const now = Date.now();
+            const labelKey = String(n.label || n.title || "").trim().toLowerCase();
+            const key = `${n.type}|${n.cam ?? ""}|${labelKey}`;
+
+            // If this came from the same merged timeline event, update the existing card instead of adding another.
+            if (n.eventId) {
+                const existingByEvent = notifs.find(x => x.eventId === n.eventId);
+                if (existingByEvent) {
+                    existingByEvent.unread = true;
+                    existingByEvent.conf = Math.max(Number(existingByEvent.conf || 0), Number(n.conf || 0));
+                    existingByEvent.lastSeen = Math.max(Number(existingByEvent.lastSeen || existingByEvent.ts || now), Number(n.ts || now));
+                    existingByEvent.desc = n.desc || existingByEvent.desc;
+                    existingByEvent.ts = existingByEvent.ts || Number(n.ts || now);
+                    saveNotifs(notifs);
+                    render();
+                    return;
+                }
+            }
+
+            // Merge repeated Punching/Kicking detections into one notification duration.
+            // This prevents notification spam every second while the same action is continuing.
+            const isViolentAction = (n.type === "violence") && NOTIF_LABELS.includes(labelKey);
+            if (isViolentAction) {
+                const recent = notifs.find(x => {
+                    const sameKey = x._key === key;
+                    const lastSeen = Number(x.lastSeen || x.ts || 0);
+                    return sameKey && (now - lastSeen) <= NOTIF_MERGE_GAP_MS;
+                });
+
+                if (recent) {
+                    const oldConf = Number(recent.conf || 0);
+                    const newConf = Number(n.conf || 0);
+                    const maxConf = Math.max(oldConf, newConf);
+                    const startMs = Number(recent.ts || now);
+                    const endMs = Number(n.ts || now);
+
+                    recent.unread = true;
+                    recent.conf = maxConf;
+                    recent.lastSeen = Math.max(Number(recent.lastSeen || startMs), endMs);
+                    recent.title = n.title || recent.title || "Violence Detected";
+                    recent.desc = `${n.label || recent.label} detected with up to ${Math.round(maxConf * 100)}% at ${n.cam || recent.cam} from ${new Date(startMs).toLocaleString()} to ${new Date(recent.lastSeen).toLocaleString()}`;
+                    saveNotifs(notifs);
+                    render();
+                    return;
+                }
+            } else {
+                // Keep basic de-dupe for non-violence notifications like camera online/offline.
+                const recent = notifs.find(x => x._key === key && (now - Number(x.ts || now)) < 1200);
+                if (recent) return;
+            }
+
+            const item = {
+                id: `${now}_${Math.random().toString(16).slice(2)}`,
+                ts: Number(n.ts || now),
+                lastSeen: Number(n.ts || now),
+                unread: true,
+                ...n,
+                _key: key
+            };
+
+            notifs.unshift(item);
+            if (notifs.length > MAX_NOTIFS) notifs = notifs.slice(0, MAX_NOTIFS);
+            saveNotifs(notifs);
+            render();
+        }
+
+        // =========================================================
+        // RENDER
+        // =========================================================
+        function iconFor(n) {
+            const label = String(n.label || "").trim().toLowerCase();
+
+            if (ACTION_ICONS[label]) {
+                return `<img class="notif-action-img" src="${ACTION_ICONS[label]}" alt="${safeText(n.label)}">`;
+            }
+
+            if (n.type === "offline") return `<i class="lni lni-close"></i>`;
+            if (n.type === "online")  return `<i class="lni lni-checkmark"></i>`;
+
+            return `<i class="lni lni-bell-1"></i>`;
+        }
+
+        function render() {
+            wrapper.innerHTML = "";
+            if (!notifs.length) {
+                emptyState.style.display = "flex";
+                return;
+            }
+            emptyState.style.display = "none";
+
+            for (const n of notifs) {
+                const el = document.createElement("div");
+                el.className = "notif-card" + (n.unread ? " unread" : "");
+                el.innerHTML = `
+                    <div class="notif-icon">${iconFor(n)}</div>
+                    <div class="notif-body">
+                        <div class="notif-title">${safeText(n.title || "Notification")}</div>
+                        <div class="notif-desc">${safeText(n.desc || "")}</div>
+                        <div class="notif-meta">
+                            <span class="badge">${safeText(n.cam || "")}</span>
+                            <span class="time">${relTime(Number(n.ts) || Date.now())}</span>
+                        </div>
+                    </div>
+                    <button class="notif-x" title="Remove">×</button>
+                `;
+
+                el.querySelector(".notif-x").onclick = () => {
+                    notifs = notifs.filter(x => x.id !== n.id);
+                    saveNotifs(notifs);
+                    render();
+                };
+
+                el.onclick = (ev) => {
+                    if (ev.target.classList.contains("notif-x")) return;
+                    n.unread = false;
+                    saveNotifs(notifs);
+                    el.classList.remove("unread");
+                };
+
+                wrapper.appendChild(el);
+            }
+        }
+
+        function clearAllNotifications() {
+            notifs = [];
+            saveNotifs(notifs);
+            render();
+        }
+
+        // =========================================================
+        // STATUS POLL (online/offline)
+        // =========================================================
+        let lastCamConnected = [null, null, null];
+
+        async function pollStatus() {
+            try {
+                const token = (localStorage.getItem("gv_token") || "").trim();
+                if (!token) return;
+
+                const res = await fetch(`${backendHttpBase()}/status`, {
+                    cache: "no-store",
+                    headers: {
+                        "Authorization": "Bearer " + token,
+                        "X-Client-ID": "GV-Electron"
+                    }
+                });
+
+                // If token invalid/expired, send user back to login
+                if (res.status === 401) {
+                    clearAuth();
+                    window.location.replace("login.html");
+                    return;
+                }
+
+                const js = await res.json().catch(() => null);
+                if (!js || !js.ok) return;
+
+                for (let i = 0; i < 3; i++) {
+                    const cam = js[`cam${i}`];
+                    if (!cam) continue;
+
+                    const connected = !!cam.connected;
+                    if (lastCamConnected[i] === null) {
+                        lastCamConnected[i] = connected;
+                        continue;
+                    }
+
+                    if (connected !== lastCamConnected[i]) {
+                        lastCamConnected[i] = connected;
+
+                        addNotif({
+                            type: connected ? "online" : "offline",
+                            cam: `cam${i + 1}`,
+                            title: connected ? "Camera Online" : "Camera Offline",
+                            desc: connected ? `Camera ${i + 1} is now online.` : `Camera ${i + 1} went offline.`,
+                        });
+                    }
+                }
+            } catch {}
+        }
+
+        // =========================================================
+        // DETECTION EXTRACT (fallback)
+        // =========================================================
+        function normLabel(s) {
+            return String(s || "").trim();
+        }
+        function isIdle(label) {
+            const t = String(label || "").trim().toLowerCase();
+            return t === "idle" || t === "no action" || t === "no_action";
+        }
+
+        function extractDetections(pkt) {
+            const out = [];
+            for (let i = 0; i < 3; i++) {
+                const cam = pkt?.[`cam${i}`];
+                const tracks = cam?.tracks;
+                if (!Array.isArray(tracks)) continue;
+
+                for (const tr of tracks) {
+                    out.push({
+                        camIndex: i,
+                        label: tr?.label,
+                        conf: tr?.conf
+                    });
+                }
+            }
+
+            return out
+            .map(x => ({
+                camIndex: x.camIndex != null ? Number(x.camIndex) : null,
+                label: String(x.label || "").trim(),
+                conf:  x.conf != null ? Number(x.conf) : null,
+            }))
+            .filter(x =>
+                x.camIndex != null &&
+                x.label &&
+                x.conf != null &&
+                !Number.isNaN(x.conf)
+            );
+        }
+
+        function getActiveCameraCountFromPacket(pkt) {
+            const c0 = !!pkt?.cam0?.connected;
+            const c1 = !!pkt?.cam1?.connected;
+            const c2 = !!pkt?.cam2?.connected;
+            return (c0 ? 1 : 0) + (c1 ? 1 : 0) + (c2 ? 1 : 0);
+        }
+
+        function getAppNow(pkt = null) {
+            const d = new Date();
+            if (getActiveCameraCountFromPacket(pkt) === 1) d.setSeconds(d.getSeconds() + 4);
+            return d;
+        }
+
+        function handlePkt(pkt) {
+            // 1) Preferred: backend-provided notifications
+            if (pkt && Array.isArray(pkt.notifications) && pkt.notifications.length) {
+                for (const n of pkt.notifications) {
+                    const conf = Number(n.conf ?? 0);
+                    const label = normLabel(n.label || "");
+                    const labelKey = label.toLowerCase();
+
+                    if (!NOTIF_LABELS.includes(labelKey)) continue;
+                    if (conf < DETECT_THRESH) continue;
+
+                    addNotif({
+                        type: n.type || "violence",
+                        cam: n.cam || `cam${Number(n.camIndex ?? 0) + 1}`,
+                        camIndex: n.camIndex != null ? Number(n.camIndex) : null,
+                        label,
+                        conf,
+                        title: n.title || "Violence Detected",
+                        desc: n.desc || `${label} detected on confidence ${Math.round(conf * 100)}%`,
+                        ts: n.ts != null ? Number(n.ts) : Date.now()
+                    });
+                }
+                return;
+            }
+
+            // 2) Fallback: derive from per-cam tracks (older backend)
+            const dets = extractDetections(pkt);
+            for (const d of dets) {
+                const conf = Number(d.conf);
+                const label = normLabel(d.label);
+
+                if (conf < DETECT_THRESH) continue;
+                if (isIdle(label)) continue;
+
+                const t = label.toLowerCase();
+                const isPunch = t.includes("punch");
+                const isKick  = t.includes("kick");
+                if (!(isPunch || isKick)) continue;
+
+                const pct = Math.round(conf * 100);
+                const tstr = getAppNow(pkt).toLocaleString();
+
+                addNotif({
+                    type: "violence",
+                    cam: `cam${Number(d.camIndex) + 1}`,
+                    camIndex: Number(d.camIndex),
+                    label,
+                    conf,
+                    title: "Violence Detected",
+                    desc: `${label} detected with ${pct}% at cam ${Number(d.camIndex) + 1} on time: ${tstr}`,
+                });
+            }
+        }
+
+        // =========================================================
+        // WEBSOCKET
+        // =========================================================
+        let ws = null;
+        let wsRetryTimer = null;
+
+        function connectWs() {
+            try {
+                if (ws) { try { ws.close(); } catch {} }
+
+                const token = (localStorage.getItem("gv_token") || "").trim();
+                if (!token) {
+                    window.location.replace("login.html");
+                    return;
+                }
+
+                ws = new WebSocket(backendWsBase());
+
+                ws.onopen = () => {};
+
+                ws.onmessage = (ev) => {
+                    // console.log("[WS RAW]", ev.data);
+                    try {
+                        const pkt = JSON.parse(ev.data);
+                        handlePkt(pkt);
+                    } catch (e) {
+                        console.warn("WS parse failed", e);
+                    }
+                };
+
+                ws.onerror = () => {};
+
+                ws.onclose = (ev) => {
+                    // 1008 = policy violation (server rejected token)
+                    if (ev && ev.code === 1008) {
+                        clearAuth();
+                        window.location.replace("login.html");
+                        return;
+                    }
+                    if (wsRetryTimer) clearTimeout(wsRetryTimer);
+                    wsRetryTimer = setTimeout(connectWs, 1500);
+                };
+
+            } catch {
+                if (wsRetryTimer) clearTimeout(wsRetryTimer);
+                wsRetryTimer = setTimeout(connectWs, 1500);
+            }
+        }
+
+
+        // =========================================================
+        // TIMELINE EVENT SYNC
+        // This lets the notification page show Punching/Kicking events even
+        // if the user was not currently viewing the notification page when
+        // the event happened.
+        // =========================================================
+        async function syncTimelineEventNotifications() {
+            try {
+                const token = (localStorage.getItem("gv_token") || "").trim();
+                if (!token) return;
+
+                const base = backendHttpBase();
+
+                for (let camIndex = 0; camIndex < 3; camIndex++) {
+                    const res = await fetch(`${base}/timeline/events?cam=${camIndex}&hours=24`, {
+                        headers: {
+                            "Authorization": "Bearer " + token,
+                            "X-Client-ID": "GV-Electron"
+                        }
+                    });
+                    if (!res.ok) continue;
+
+                    const js = await res.json().catch(() => null);
+                    if (!js || !js.ok || !Array.isArray(js.events)) continue;
+
+                    for (const ev of js.events) {
+                        const label = String(ev.label || "").trim();
+                        const labelKey = label.toLowerCase();
+                        const conf = Number(ev.conf || 0);
+                        if (!NOTIF_LABELS.includes(labelKey)) continue;
+                        if (conf < DETECT_THRESH) continue;
+
+                        const tsMs = Number(ev.ts_start || 0) * 1000;
+                        const pct = Math.round(conf * 100);
+
+                        addNotif({
+                            eventId: `timeline-${ev.id}`,
+                            type: "violence",
+                            cam: `cam${camIndex + 1}`,
+                            camIndex,
+                            label,
+                            conf,
+                            title: "Violence Detected",
+                            desc: `${label} detected with ${pct}% confidence at cam ${camIndex + 1} on time: ${new Date(tsMs).toLocaleString()}`,
+                            ts: tsMs || Date.now()
+                        });
+                    }
+                }
+            } catch (e) {
+                console.warn("timeline notification sync failed", e);
+            }
+        }
+
+        // =========================================================
+        // START
+        // =========================================================
+        render();
+        pollStatus();
+        syncTimelineEventNotifications();
+        setInterval(pollStatus, STATUS_POLL_MS);
+        setInterval(syncTimelineEventNotifications, 5000);
+        connectWs();
+    </script>
+
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const currentPage = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+        document.querySelectorAll("#sidebar .sidebar-link[href]").forEach(link => {
+          const href = (link.getAttribute("href") || "").toLowerCase();
+          if (href && href !== "#" && href === currentPage) {
+            link.classList.add("active");
+          }
+        });
+      });
+    </script>
+
+</body>
+</html>

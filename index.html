@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardian Vision</title>
+    <link rel="stylesheet" href="icons/lineicons/lineicons.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="page-loader" id="pageLoader">
+        <div class="ring"></div>
+    </div>
+
+    <script>
+        if (localStorage.getItem("gv_logged_in") !== "true") {
+          window.location.replace("login.html");
+        }
+    </script>
+
+    <div class="container">
+        <aside id="sidebar">
+            <label for="toggler" class="toggle-btn">
+                <img src="image/GV_Logo_3.svg" alt="logo" class="logo">
+                <span>Guardian Vision</span>
+            </label>
+            <ul class="sidebar-nav">
+                <li class="sidebar-item">
+                    <a href="index.html" class="sidebar-link active">
+                        <i class="lni lni-dashboard-square-1"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="records.html" class="sidebar-link">
+                        <i class="lni lni-database-2"></i>
+                        <span>Records</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="notifications.html" class="sidebar-link">
+                        <i class="lni lni-bell-1"></i>
+                        <span>Notifications</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="profile.html" class="sidebar-link">
+                        <i class="lni lni-user-4"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="settings.html" class="sidebar-link">
+                        <i class="lni lni-gear-1"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link" onclick="logout()">
+                    <i class="lni lni-exit"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="main">
+            <div class="dashboard-navbar">
+                <form action="#">
+                    <div class="gv-header">
+                        <a href="#"><h2>Dashboard</h2></a>
+                    </div>
+                </form>
+                <div class="form-content">
+                    <ul class="main-nav">
+                        <li class="user-link">
+                            <a href="#">
+                                <img src="image/account.png" alt="Profile" class="avatar">
+                            </a>
+                            <div class="user-link-dropdown">
+                                <a href="profile.html" class="dropdown-item">Profile</a>
+                                <a href="#" class="dropdown-item" onclick="logout()">Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="camera-and-gestures">
+
+                    <!-- CAMERA SECTION -->
+                    <div class="camera-container">
+                        <div class="camera-header">
+                            <span id="cameraTitle">Camera 1</span>
+                            <span id="camera-datetime">--</span>
+                        </div>
+
+                        <!-- Use IMG for backend-rendered frames -->
+                        <img id="camera-stream" alt="Live Camera" style="width:100%; height:auto; display:block; background:#000;" />
+
+                        <!-- Mini Camera Panel -->
+                        <div class="camera-switcher">
+                            <div class="cam-thumb active" data-camera="1">
+                                <span>Cam 1</span>
+                                <img class="thumb-img" alt="Cam 1" style="width:100%; height:100%; display:block; background:#000;" />
+                            </div>
+
+                            <div class="cam-thumb" data-camera="2">
+                                <span>Cam 2</span>
+                                <img class="thumb-img" alt="Cam 2" style="width:100%; height:100%; display:block; background:#000;" />
+                            </div>
+
+                            <div class="cam-thumb" data-camera="3">
+                                <span>Cam 3</span>
+                                <img class="thumb-img" alt="Cam 3" style="width:100%; height:100%; display:block; background:#000;" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GESTURES TABLE SECTION -->
+                    <div class="gestures-table-container">
+                        <h2>Gestures Detected</h2>
+
+                        <div style="overflow-x: auto;">
+                            <table id="posts">
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>ID</th>
+                                        <th>Confidence</th>
+                                        <th>Time</th>
+                                        <th>Camera</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gestureBody">
+                                    <!-- Will be populated from backend -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- ANALYTICS SECTION -->
+                        <div class="analytics-container">
+                            <h2>Analytics</h2>
+
+                            <div class="analytics-grid">
+                                <div class="analytics-card">
+                                    <span class="analytics-title">FPS</span>
+                                    <span class="analytics-value" id="fpsValue">--</span>
+                                </div>
+
+                                <div class="analytics-card">
+                                    <span class="analytics-title">Most Detected Gesture</span>
+                                    <span class="analytics-value" id="mostGesture">--</span>
+                                </div>
+
+                                <div class="analytics-card">
+                                    <span class="analytics-title">Active Cameras</span>
+                                    <span class="analytics-value" id="activeCams">0 / 3</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+        localStorage.removeItem("gv_logged_in");
+        localStorage.removeItem("gv_token");
+        localStorage.removeItem("gv_user_email");
+        localStorage.removeItem("gv_name");
+        localStorage.removeItem("gv_role");
+        localStorage.removeItem("gv_user_id");
+        window.location.replace("login.html");
+        }
+    </script>
+
+    <!-- ✅ WebSocket + Stream + Table (LOW-LATENCY RENDER: drops backlog) -->
+    <script>
+      // Reads backend IP/port saved from Settings (fallback to localhost:8766)
+      function getBackendWsUrl() {
+        const ip = (localStorage.getItem("gv_server_ip") || "127.0.0.1").trim();
+        const port = (localStorage.getItem("gv_server_port") || "8766").trim();
+        const token = (localStorage.getItem("gv_token") || "").trim();
+        return `ws://${ip}:${port}/ws?token=${encodeURIComponent(token)}&client_id=${encodeURIComponent("GV-Electron")}`;
+      }
+
+      const mainImg = document.getElementById("camera-stream");
+      const thumbs = document.querySelectorAll(".cam-thumb");
+      const thumbImgs = document.querySelectorAll(".thumb-img");
+      const gestureBody = document.getElementById("gestureBody");
+      const fpsValue = document.getElementById("fpsValue");
+      const mostGesture = document.getElementById("mostGesture");
+      const activeCamsEl = document.getElementById("activeCams");
+      const dtEl = document.getElementById("camera-datetime");
+
+      let ws = null;
+      let currentCamera = 1;
+
+      const MAX_ROWS = 10;
+
+      function getActiveCameraCountFromPacket(pkt) {
+        const c0 = !!pkt?.cam0?.connected;
+        const c1 = !!pkt?.cam1?.connected;
+        const c2 = !!pkt?.cam2?.connected;
+        return (c0 ? 1 : 0) + (c1 ? 1 : 0) + (c2 ? 1 : 0);
+      }
+
+      function getAppNow(activeCount = 0) {
+        const d = new Date();
+        if (Number(activeCount) === 1) d.setSeconds(d.getSeconds() + 4);
+        return d;
+      }
+
+      function formatNowParts(activeCount = 0) {
+        const d = getAppNow(activeCount);
+        const date = d.toLocaleDateString();
+        const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        return { date, time };
+      }
+
+      function renderTable(rowsToRender) {
+        if (!rowsToRender.length) {
+          gestureBody.innerHTML = `
+            <tr>
+              <td colspan="5" style="text-align:center; opacity:.8;">No active detections</td>
+            </tr>
+          `;
+          return;
+        }
+
+        gestureBody.innerHTML = rowsToRender.map(r => `
+          <tr>
+            <td>${r.gesture}</td>
+            <td>ID ${r.id}</td>
+            <td>${r.conf}</td>
+            <td>${r.time}</td>
+            <td>${r.site}</td>
+          </tr>
+        `).join("");
+      }
+
+      // Prevent reconnect storms
+      let reconnectTimer = null;
+
+      // ---- LOW-LATENCY: store only latest packet; render at fixed rate ----
+      let latestPkt = null;
+      let lastRender = 0;
+      const RENDER_MS = 80; // ~12.5 fps UI render (prevents WS/UI backlog)
+      const latestSrc = [null, null, null];
+
+      function backendBase() {
+        const ip = (localStorage.getItem("gv_server_ip") || "127.0.0.1").trim();
+        const port = (localStorage.getItem("gv_server_port") || "8766").trim();
+        return `http://${ip}:${port}`;
+      }
+
+      async function authFetch(path, options = {}) {
+        const headers = Object.assign({
+          "Authorization": "Bearer " + (localStorage.getItem("gv_token") || ""),
+          "X-Client-ID": "GV-Electron"
+        }, options.headers || {});
+        const res = await fetch(`${backendBase()}${path}`, { ...options, headers });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.ok === false) throw new Error(data.error || data.detail || `Request failed: ${path}`);
+        return data;
+      }
+
+      function connectWs() {
+        // close old socket if any
+        try { if (ws) ws.close(); } catch {}
+        ws = null;
+
+        const url = getBackendWsUrl();
+        console.log("[WS] connecting:", url);
+
+        ws = new WebSocket(url);
+
+        ws.onopen = () => {
+          console.log("[WS] connected");
+          if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+        };
+
+        ws.onclose = () => {
+          console.log("[WS] closed - retry in 1s...");
+          if (!reconnectTimer) {
+            reconnectTimer = setTimeout(() => {
+              reconnectTimer = null;
+              connectWs();
+            }, 1000);
+          }
+        };
+
+        ws.onerror = (e) => {
+          console.log("[WS] error", e);
+          // Let onclose handle reconnect
+        };
+
+        // IMPORTANT: onmessage only overwrites latestPkt (drops backlog)
+        ws.onmessage = (evt) => {
+          try {
+            latestPkt = JSON.parse(evt.data);
+          } catch {
+            return;
+          }
+        };
+      }
+
+      function renderLoop(ts) {
+        requestAnimationFrame(renderLoop);
+
+        if (!latestPkt) return;
+        if (ts - lastRender < RENDER_MS) return;
+        lastRender = ts;
+
+        const pkt = latestPkt;
+        latestPkt = null; // drop intermediate packets (keeps video "live")
+
+        const activeCount = getActiveCameraCountFromPacket(pkt);
+        dtEl.textContent = getAppNow(activeCount).toLocaleString([], { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+        // frames (store latest base64 -> data URL)
+        if (pkt.frame0) latestSrc[0] = "data:image/jpeg;base64," + pkt.frame0;
+        if (pkt.frame1) latestSrc[1] = "data:image/jpeg;base64," + pkt.frame1;
+        if (pkt.frame2) latestSrc[2] = "data:image/jpeg;base64," + pkt.frame2;
+
+        // thumbs
+        if (thumbImgs[0] && latestSrc[0]) thumbImgs[0].src = latestSrc[0];
+        if (thumbImgs[1] && latestSrc[1]) thumbImgs[1].src = latestSrc[1];
+        if (thumbImgs[2] && latestSrc[2]) thumbImgs[2].src = latestSrc[2];
+
+        // main view
+        const idx = Math.max(0, Math.min(2, (currentCamera - 1)));
+        if (mainImg && latestSrc[idx]) mainImg.src = latestSrc[idx];
+
+        // FPS
+        if (pkt.fps != null) fpsValue.textContent = String(Math.round(pkt.fps));
+
+        // Active cameras counter (based on backend cam0/cam1/cam2.connected)
+        if (activeCamsEl) activeCamsEl.textContent = `${activeCount} / 3`;
+
+// live tracks table from ALL cams (1/2/3) + supports multiple people
+const currentRows = [];
+const { time } = formatNowParts(activeCount);
+
+for (let camIdx = 0; camIdx < 3; camIdx++) {
+  const camKey = "cam" + camIdx;
+  const tracks = (pkt[camKey]?.tracks || []).slice(0, MAX_ROWS);
+
+  for (let i = 0; i < tracks.length; i++) {
+    const t = tracks[i] || {};
+    const label = String(t.label || "UNKNOWN");
+    const confPct = Math.round((t.conf || 0) * 100) + "%";
+    const tid = (t.track_id ?? t.trackId ?? t.id ?? t.tid ?? i);
+
+    currentRows.push({
+      gesture: label,
+      id: tid,
+      conf: confPct,
+      time,
+      site: "Camera " + (camIdx + 1)
+    });
+  }
+}
+
+renderTable(currentRows.slice(0, MAX_ROWS));
+
+// Update "Most Detected Gesture" based on the current visible table rows
+const counts = {};
+for (const r of currentRows) counts[r.gesture] = (counts[r.gesture] || 0) + 1;
+let best = "--", bestN = -1;
+for (const [k, v] of Object.entries(counts)) {
+  if (v > bestN) { bestN = v; best = k; }
+}
+mostGesture.textContent = best;
+
+}
+
+      // camera thumb UI
+      thumbs.forEach(thumb => {
+        thumb.addEventListener("click", () => {
+          currentCamera = Number(thumb.dataset.camera || "1");
+          thumbs.forEach(t => t.classList.remove("active"));
+          thumb.classList.add("active");
+          document.getElementById("cameraTitle").textContent = "Camera " + currentCamera;
+        });
+      });
+
+      connectWs();
+      requestAnimationFrame(renderLoop);
+
+      // If user changes settings in another tab/page, reload WS
+      window.addEventListener("storage", (e) => {
+        if (e.key === "gv_server_ip" || e.key === "gv_server_port") {
+          connectWs();
+        }
+      });
+    </script>
+
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const currentPage = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+        document.querySelectorAll("#sidebar .sidebar-link[href]").forEach(link => {
+          const href = (link.getAttribute("href") || "").toLowerCase();
+          if (href && href !== "#" && href === currentPage) {
+            link.classList.add("active");
+          }
+        });
+      });
+    </script>
+
+</body>
+</html>

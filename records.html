@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guardian Vision - Records</title>
+
+  <!-- icons used by sidebar -->
+  <link rel="stylesheet" href="icons/lineicons/lineicons.css">
+
+  <link rel="stylesheet" href="recordsstyle.css" />
+</head>
+
+<body>
+
+  <script>
+    // keep same login guard behavior as your other pages
+    if (localStorage.getItem("gv_logged_in") !== "true") {
+      window.location.replace("login.html");
+    }
+  </script>
+
+  <div class="container">
+
+    <!-- ✅ Sidebar (same as settings.html) -->
+    <aside id="sidebar">
+      <label for="toggler" class="toggle-btn">
+        <img src="image/GV_Logo_3.svg" alt="logo" class="logo">
+        <span>Guardian Vision</span>
+      </label>
+
+      <ul class="sidebar-nav">
+        <li class="sidebar-item">
+          <a href="index.html" class="sidebar-link">
+            <i class="lni lni-dashboard-square-1"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+
+        <li class="sidebar-item">
+          <a href="records.html" class="sidebar-link active">
+            <i class="lni lni-database-2"></i>
+            <span>Records</span>
+          </a>
+        </li>
+
+        <li class="sidebar-item">
+          <a href="notifications.html" class="sidebar-link">
+            <i class="lni lni-bell-1"></i>
+            <span>Notifications</span>
+          </a>
+        </li>
+
+        <li class="sidebar-item">
+          <a href="profile.html" class="sidebar-link">
+            <i class="lni lni-user-4"></i>
+            <span>Profile</span>
+          </a>
+        </li>
+
+        <li class="sidebar-item">
+          <a href="settings.html" class="sidebar-link">
+            <i class="lni lni-gear-1"></i>
+            <span>Settings</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <a href="#" class="sidebar-link" onclick="logout()">
+          <i class="lni lni-exit"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ✅ Main wrapper -->
+    <div class="main">
+
+      <!-- ✅ Top navbar (same pattern as settings) -->
+      <div class="dashboard-navbar">
+        <form action="#">
+          <div class="gv-header">
+            <a href="#"><h2>Records</h2></a>
+          </div>
+        </form>
+
+        <div class="form-content">
+          <ul class="main-nav">
+            <li class="user-link">
+              <a href="#">
+                <img src="image/account.png" alt="Profile" class="avatar">
+              </a>
+              <div class="user-link-dropdown">
+                <a href="profile.html" class="dropdown-item">Profile</a>
+                <a href="#" class="dropdown-item" onclick="logout()">Logout</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ✅ Your original Records page content goes inside .content -->
+      <div class="content">
+
+        <div class="records-page">
+
+          <!-- Header -->
+          <header class="records-header">
+            <div class="records-header-left">
+              <h1>Recordings</h1>
+              <p class="sub">Browse manually saved clips and timeline playback.</p>
+              <p class="recording-note">Note: Continuous recordings are automatically deleted after 30 days. Manually saved clips will remain unless you delete them.</p>
+            </div>
+
+            <div class="records-header-right">
+              <button id="gridViewBtn" class="view-btn active">Grid</button>
+              <button id="listViewBtn" class="view-btn">List</button>
+            </div>
+          </header>
+
+          <!-- Filters -->
+          <section class="records-filters">
+            <div class="filter-row">
+              <div class="filter-group">
+                <label for="actionFilter">Action</label>
+                <select id="actionFilter">
+                  <option value="">All</option>
+                  <option value="Punching">Punching</option>
+                  <option value="Kicking">Kicking</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label for="dateFilter">Date</label>
+                <input id="dateFilter" type="date" />
+              </div>
+
+              <div class="filter-group">
+                <label>From Time</label>
+                <div class="time-picker">
+                  <select id="timeFromHour"></select>
+                  <span class="time-sep">:</span>
+                  <select id="timeFromMin"></select>
+                  <select id="timeFromAmPm"></select>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label>To Time</label>
+                <div class="time-picker">
+                  <select id="timeToHour"></select>
+                  <span class="time-sep">:</span>
+                  <select id="timeToMin"></select>
+                  <select id="timeToAmPm"></select>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label for="searchFilter">Search</label>
+                <input id="searchFilter" type="text" placeholder="Search action, date, filename..." />
+              </div>
+
+              <div class="filter-group refresh-group">
+                <label>&nbsp;</label>
+                <button id="refreshBtn" class="refresh-btn">Refresh</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Timeline panel -->
+          <section class="timeline-panel">
+            <div class="timeline-header timeline-header-stacked">
+              <div class="timeline-title">
+                <h2 id="tlTitle">Timeline</h2>
+                <div id="tlStatus" class="timeline-status">Ready</div>
+              </div>
+
+              <div class="timeline-controls timeline-controls-under">
+                <div class="tl-control-group">
+                  <label for="tlActionFilter">Action:</label>
+                  <select id="tlActionFilter">
+                    <option value="">All</option>
+                    <option value="Punching">Punching</option>
+                    <option value="Kicking">Kicking</option>
+                  </select>
+                </div>
+
+                <div class="tl-control-group">
+                  <label for="tlCamSelect">Camera:</label>
+                  <select id="tlCamSelect">
+                    <option value="0">Cam 1</option>
+                    <option value="1">Cam 2</option>
+                    <option value="2">Cam 3</option>
+                  </select>
+                </div>
+
+                <div class="tl-control-group">
+                  <label for="tlHoursSelect">Range:</label>
+                  <select id="tlHoursSelect">
+                    <option value="24">24 hours</option>
+                    <option value="168">7 days</option>
+                    <option value="360" selected>15 days</option>
+                    <option value="720">30 days</option>
+                  </select>
+                </div>
+
+                <div class="tl-zoom-group">
+                  <button id="tlZoomOutBtn" type="button" class="tl-zoom-btn" title="Zoom out">−</button>
+                  <button id="tlZoomInBtn" type="button" class="tl-zoom-btn" title="Zoom in">+</button>
+                  <button id="tlPanLeftBtn" type="button" class="tl-zoom-btn" title="Move left">‹</button>
+                  <button id="tlPanRightBtn" type="button" class="tl-zoom-btn" title="Move right">›</button>
+                  <button id="tlResetZoomBtn" type="button" class="tl-reset-btn">Reset View</button>
+                  <div class="tl-preset-group" aria-label="Quick zoom presets">
+                    <button id="tlPreset30dBtn" type="button" class="tl-preset-btn" data-preset-seconds="2592000" title="Show 30 days">30d</button>
+                    <button id="tlPreset7dBtn" type="button" class="tl-preset-btn" data-preset-seconds="604800" title="Zoom to 7 days">7d</button>
+                    <button id="tlPreset1dBtn" type="button" class="tl-preset-btn" data-preset-seconds="86400" title="Zoom to 1 day">1d</button>
+                    <button id="tlPreset1hBtn" type="button" class="tl-preset-btn" data-preset-seconds="3600" title="Zoom to 1 hour">1h</button>
+                    <button id="tlPreset10mBtn" type="button" class="tl-preset-btn" data-preset-seconds="600" title="Zoom to 10 minutes">10m</button>
+                  </div>
+                </div>
+
+                <button id="tlRefreshBtn" class="tl-refresh">Refresh</button>
+              </div>
+            </div>
+
+            <div class="timeline-body">
+              <div class="timeline-overview-card">
+                <div class="timeline-overview-head">
+                  <span>Overview</span>
+                  <span id="tlOverviewInfo">Drag the highlighted window to move around the selected range.</span>
+                </div>
+                <div id="tlOverviewTicks" class="timeline-overview-ticks" aria-hidden="true"></div>
+                <div id="tlOverviewBar" class="timeline-overview-bar" title="Full selected timeline overview">
+                  <div id="tlOverviewWindow" class="timeline-overview-window" title="Current zoomed view"></div>
+                </div>
+                <div class="timeline-overview-labels">
+                  <span id="tlOverviewLeftLabel">--</span>
+                  <span id="tlOverviewRightLabel">--</span>
+                </div>
+              </div>
+
+              <div class="timeline-bar-wrap timeline-current-card">
+                <div class="timeline-current-head">
+                  <div>
+                    <strong>Zoomed timeline</strong>
+                    <span>Click the bar to play. Drag the white Start/End handles to choose what to save. The blue line is only the current playback position.</span>
+                  </div>
+                  <div class="timeline-legend">
+                    <span><i class="legend-cov"></i>Recording</span>
+                    <span><i class="legend-punch"></i>Punching</span>
+                    <span><i class="legend-kick"></i>Kicking</span>
+                    <span><i class="legend-marker"></i>Start/End</span>
+                    <span><i class="legend-playhead"></i>Playhead</span>
+                  </div>
+                </div>
+
+                <div class="timeline-labels">
+                  <div id="tlLeftLabel" class="timeline-label">--</div>
+                  <div id="tlRightLabel" class="timeline-label">--</div>
+                </div>
+
+                <div id="tlZoomLabel" class="timeline-zoom-label">Full timeline view</div>
+
+                <div id="tlCurrentTicks" class="timeline-current-ticks" aria-hidden="true"></div>
+
+                <div id="timelineBar" class="timeline-bar">
+                  <!-- injected: coverage blocks + event segments + cursor -->
+                  <div id="tlCursorLine" class="timeline-cursor" style="left:100%;"></div>
+                </div>
+
+                <div class="timeline-player-row">
+                  <video id="tlPlayer" class="timeline-player" controls preload="metadata"></video>
+                  <div class="timeline-manual-save">
+                    <strong>Manual clip save</strong>
+                    <div class="manual-save-grid">
+                      <label>Start <input id="clipStartInput" type="datetime-local" step="1"></label>
+                      <label>End <input id="clipEndInput" type="datetime-local" step="1"></label>
+                      <label>Label <input id="clipLabelInput" type="text" placeholder="Punching / Kicking"></label>
+                      <button id="clipSaveBtn" type="button">Save selected clip</button>
+                      <div id="clipSaveNotice" class="clip-save-notice" aria-live="polite"></div>
+                    </div>
+                    <small>Tip: violent actions only create timeline stamps. Click a red/orange stamp, adjust start/end, then save manually.</small>
+                  </div>
+                  <div class="timeline-seek">
+                    <input id="tlCursor" type="range" min="0" max="100" value="100" />
+                    <div class="timeline-seek-labels">
+                      <span id="tlCursorLabel">--</span>
+                      <span>seek</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="timeline-events">
+                <div class="timeline-events-head">
+                  <h3>Detected Events</h3>
+                  <button id="tlClearEventsBtn" class="tl-clear-events-btn" type="button">Clear events</button>
+                </div>
+                <div id="tlEventList" class="timeline-event-list">
+                  <div class="timeline-empty">No matching punching/kicking events loaded.</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Records list -->
+          <section id="recordsContainer" class="records-container grid-view">
+            <!-- cards injected -->
+          </section>
+        </div>
+
+        <!-- Modal -->
+        <div id="gvModal" class="gv-modal">
+          <div class="gv-modal-content">
+            <div class="gv-modal-header">
+              <div id="gvModalTitle" class="gv-modal-title">Recording</div>
+              <button id="gvModalClose" class="gv-modal-close">&times;</button>
+            </div>
+            <video id="gvModalVideo" class="gv-modal-video" controls></video>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function logout() {
+      localStorage.removeItem("gv_logged_in");
+      localStorage.removeItem("gv_user_email");
+      window.location.replace("login.html");
+    }
+  </script>
+
+  <!-- ✅ your existing JS (unchanged) -->
+  <script>
+    // -----------------------------
+    // Utils
+    // -----------------------------
+    function safeText(s) {
+      return String(s ?? "").replace(/[<>&"]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "\"": "&quot;" }[c]));
+    }
+
+    function fmtTs(ts) {
+      try {
+        const d = new Date(Number(ts) * 1000);
+        return d.toLocaleString();
+      } catch (_) {
+        return String(ts);
+      }
+    }
+
+    function confToLevel(conf01) {
+      // conf01 is 0..1 (your backend uses 0..1)
+      const pct = Number(conf01) * 100;
+
+      if (pct >= 96) return "conf-red";      // 96–100
+      if (pct >= 91) return "conf-orange";   // 91–95
+      if (pct >= 85) return "conf-yellow";   // 85–90
+      return "conf-low";                     // below 85
+    }
+
+
+    function actionToTimelineClass(label, conf01 = 0) {
+      const txt = String(label || "").trim().toLowerCase();
+
+      // Action-based colors for timeline stamps:
+      // Punching = red, Kicking = orange.
+      if (txt.includes("punch")) return "conf-red";
+      if (txt.includes("kick")) return "conf-orange";
+
+      // Fallback for other actions: use confidence color.
+      return confToLevel(conf01);
+    }
+
+
+    // Use same keys as settings/login pages (fallback to old ones too)
+    function getBackendHttpBase() {
+      const host =
+        (localStorage.getItem("gv_server_ip") ||
+         localStorage.getItem("gv_host") ||
+         "127.0.0.1").trim();
+
+      const port =
+        (localStorage.getItem("gv_server_port") ||
+         localStorage.getItem("gv_port") ||
+         "8766").trim();
+
+      return `http://${host}:${port}`;
+    }
+
+    // Add ?token= for video URLs (optional; safe even if backend ignores it)
+    function withToken(url) {
+      const token = (localStorage.getItem("gv_token") || "").trim();
+      if (!token) return url;
+      return url.includes("?")
+        ? `${url}&token=${encodeURIComponent(token)}`
+        : `${url}?token=${encodeURIComponent(token)}`;
+    }
+
+    // -----------------------------
+    // Modal wiring
+    // -----------------------------
+    const modal = document.getElementById("gvModal");
+    const modalClose = document.getElementById("gvModalClose");
+    const modalVideo = document.getElementById("gvModalVideo");
+    const modalTitle = document.getElementById("gvModalTitle");
+
+    modalClose.addEventListener("click", () => {
+      modal.classList.remove("show");
+      modalVideo.pause();
+      modalVideo.removeAttribute("src");
+      modalVideo.load();
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modalClose.click();
+    });
+
+    // -----------------------------
+    // Records
+    // -----------------------------
+    const recordsContainer = document.getElementById("recordsContainer");
+    const refreshBtn = document.getElementById("refreshBtn");
+    let recordsRaw = [];
+
+    const actionFilter = document.getElementById("actionFilter");
+    const dateFilter = document.getElementById("dateFilter");
+    const searchFilter = document.getElementById("searchFilter");
+
+    const timeFromHour = document.getElementById("timeFromHour");
+    const timeFromMin  = document.getElementById("timeFromMin");
+    const timeFromAmPm = document.getElementById("timeFromAmPm");
+    const timeToHour   = document.getElementById("timeToHour");
+    const timeToMin    = document.getElementById("timeToMin");
+    const timeToAmPm   = document.getElementById("timeToAmPm");
+
+    function fillTimePickers() {
+      // Hours: blank + 1..12
+      const hours = ["", ...Array.from({length:12}, (_,i)=>String(i+1))];
+      // Minutes: blank + 00..59 (step 1)
+      const mins = ["", ...Array.from({length:60}, (_,i)=>String(i).padStart(2,"0"))];
+      const ap = ["", "AM", "PM"];
+
+      function fill(sel, arr) {
+        if (!sel) return;
+        sel.innerHTML = arr.map(v => `<option value="${v}">${v || "--"}</option>`).join("");
+      }
+
+      fill(timeFromHour, hours);
+      fill(timeToHour, hours);
+      fill(timeFromMin, mins);
+      fill(timeToMin, mins);
+      fill(timeFromAmPm, ap);
+      fill(timeToAmPm, ap);
+
+      // sensible defaults (blank = disabled)
+      if (timeFromMin) timeFromMin.value = "";
+      if (timeToMin) timeToMin.value = "";
+    }
+
+    function pickerToMinutes(hSel, mSel, apSel) {
+      const h = (hSel?.value || "").trim();
+      const m = (mSel?.value || "").trim();
+      const ap = (apSel?.value || "").trim().toUpperCase();
+
+      if (!h || !m || !ap) return null;
+
+      let hh = Number(h);
+      const mm = Number(m);
+      if (!Number.isFinite(hh) || !Number.isFinite(mm)) return null;
+
+      if (ap === "AM") {
+        if (hh === 12) hh = 0;
+      } else if (ap === "PM") {
+        if (hh !== 12) hh += 12;
+      } else {
+        return null;
+      }
+
+      return hh * 60 + mm;
+    }
+
+    function parseCompactStamp(s) {
+      // supports: YYYYMMDD_HHMMSS or YYYYMMDDHHMMSS
+      const m = String(s || "").trim().match(
+        /^(\d{4})(\d{2})(\d{2})[_-]?(\d{2})(\d{2})(\d{2})$/
+      );
+      if (!m) return null;
+
+      const [, yy, mo, dd, hh, mi, ss] = m;
+      const d = new Date(
+        Number(yy),
+        Number(mo) - 1,
+        Number(dd),
+        Number(hh),
+        Number(mi),
+        Number(ss)
+      );
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function getRecordDateObj(item) {
+      const meta = item?.meta || {};
+
+      // 1) best source: actual clip start timestamp
+      if (meta.clip_ts_start != null) {
+        const ts = Number(meta.clip_ts_start);
+        if (Number.isFinite(ts)) {
+          const d = new Date(ts * 1000);
+          if (!isNaN(d.getTime())) return d;
+        }
+      }
+
+      // 2) fallback: compact created string like 20260312_150000
+      const created = String(meta.created || "").trim();
+      let d = parseCompactStamp(created);
+      if (d) return d;
+
+      // 3) fallback: normal datetime string
+      d = new Date(created);
+      if (isNaN(d.getTime()) && created.includes(" ")) {
+        d = new Date(created.replace(" ", "T"));
+      }
+      if (!isNaN(d.getTime())) return d;
+
+      // 4) fallback: file mtime timestamp if backend provided it
+      if (meta.created_ts != null) {
+        const ts = Number(meta.created_ts);
+        if (Number.isFinite(ts)) {
+          d = new Date(ts * 1000);
+          if (!isNaN(d.getTime())) return d;
+        }
+      }
+
+      return null;
+    }
+
+    function formatRecordDate(d) {
+      if (!(d instanceof Date) || isNaN(d.getTime())) return "";
+      const pad = n => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+
+    function formatRecordDateTime(d) {
+      if (!(d instanceof Date) || isNaN(d.getTime())) return "";
+      const pad = n => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function getRecordMinutes(item) {
+      const d = getRecordDateObj(item);
+      if (!d) return null;
+      return d.getHours() * 60 + d.getMinutes();
+    }
+
+    function applyFilters() {
+      const a = (actionFilter.value || "").trim().toLowerCase();
+      const d = (dateFilter.value || "").trim(); // yyyy-mm-dd
+      const q = (searchFilter.value || "").trim().toLowerCase();
+
+      const tFrom = pickerToMinutes(timeFromHour, timeFromMin, timeFromAmPm);
+      const tTo   = pickerToMinutes(timeToHour, timeToMin, timeToAmPm);
+
+      let tStart = tFrom;
+      let tEnd = tTo;
+      if (tStart != null && tEnd != null && tEnd < tStart) {
+        const tmp = tStart; tStart = tEnd; tEnd = tmp;
+      }
+
+      const filtered = recordsRaw.filter(item => {
+        const meta = item.meta || {};
+        const label = (meta.label || "").toLowerCase();
+        const file = (item.file || "").toLowerCase();
+
+        const recDateObj = getRecordDateObj(item);
+        const created = recDateObj ? formatRecordDateTime(recDateObj) : (meta.created || "");
+        const recDate = recDateObj ? formatRecordDate(recDateObj) : "";
+        const recDateTime = recDateObj ? formatRecordDateTime(recDateObj) : String(meta.created || "");
+
+        if (a && label !== a) return false;
+
+        if (d && recDate !== d) return false;
+
+        if (q) {
+          const blob = `${label} ${recDateTime} ${file}`.toLowerCase();
+          if (!blob.includes(q)) return false;
+        }
+
+        if (tStart != null || tEnd != null) {
+          const mins = getRecordMinutes(item);
+          if (mins == null) return false;
+
+          if (tStart != null && mins < tStart) return false;
+          if (tEnd != null && mins > tEnd) return false;
+        }
+
+        return true;
+      });
+
+      renderRecords(filtered);
+    }
+
+    actionFilter.addEventListener("change", applyFilters);
+    dateFilter.addEventListener("change", applyFilters);
+    searchFilter.addEventListener("input", () => { applyFilters(); renderTimelineFromCache(); });
+
+    [timeFromHour, timeFromMin, timeFromAmPm, timeToHour, timeToMin, timeToAmPm].forEach(el => {
+      if (!el) return;
+      el.addEventListener("change", applyFilters);
+    });
+
+    // Init dropdown options
+    fillTimePickers();
+
+
+    async function loadRecords() {
+      const base = getBackendHttpBase();
+      const token = (localStorage.getItem("gv_token") || "");
+
+      try {
+        const res = await fetch(`${base}/records_list`, {
+          headers: {
+            "Authorization": "Bearer " + token,
+            "X-Client-ID": "GV-Electron"
+          }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const items = Array.isArray(data.items) ? data.items : [];
+        recordsRaw = items;
+        applyFilters();
+      } catch (e) {
+        console.error(e);
+        recordsContainer.innerHTML = `<div class="empty">Failed to load records: ${safeText(e?.message || e)}</div>`;
+      }
+    }
+
+    function renderRecords(items) {
+      if (!items.length) {
+        recordsContainer.innerHTML = `<div class="empty">No recordings found.</div>`;
+        return;
+      }
+
+      const base = getBackendHttpBase();
+
+      recordsContainer.innerHTML = items.map(item => {
+        const meta = item.meta || {};
+        const url = withToken(base + item.url);
+        const label = meta.label || "Recorded";
+        const created = meta.created || "";
+        const conf = meta.conf != null ? `${(Number(meta.conf) * 100).toFixed(1)}%` : "";
+
+        return `
+          <div class="record-card">
+            <div class="record-card-top">
+              <div class="record-badge">${safeText(label)}</div>
+              <div class="record-date">${safeText(created)}</div>
+            </div>
+            <div class="record-card-mid">
+              <div class="record-file">${safeText(item.file)}</div>
+              <div class="record-conf ${confToLevel(meta.conf ?? 0)}">${safeText(conf)}</div>
+            </div>
+            <div class="record-card-actions">
+              <button class="play-btn" data-url="${safeText(url)}" data-title="${safeText(label)}">Play</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recordsContainer.querySelectorAll("button.play-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const url = btn.getAttribute("data-url") || "";
+          const title = btn.getAttribute("data-title") || "Recording";
+          modalTitle.textContent = title;
+          modalVideo.src = url;
+          modal.classList.add("show");
+          modalVideo.play().catch(() => {});
+        });
+      });
+    }
+
+    refreshBtn.addEventListener("click", () => {
+      loadRecords();
+      refreshTimeline();
+    });
+
+    // -----------------------------
+    // Timeline
+    // -----------------------------
+    const tlBar = document.getElementById("timelineBar");
+    const tlActionFilter = document.getElementById("tlActionFilter");
+    const tlCamSelect = document.getElementById("tlCamSelect");
+    const tlRefreshBtn = document.getElementById("tlRefreshBtn");
+    const tlHoursSelect = document.getElementById("tlHoursSelect");
+    const tlZoomInBtn = document.getElementById("tlZoomInBtn");
+    const tlZoomOutBtn = document.getElementById("tlZoomOutBtn");
+    const tlZoomResetBtn = document.getElementById("tlResetZoomBtn");
+    const tlPanLeftBtn = document.getElementById("tlPanLeftBtn");
+    const tlPanRightBtn = document.getElementById("tlPanRightBtn");
+    const tlPreset30dBtn = document.getElementById("tlPreset30dBtn");
+    const tlPreset7dBtn = document.getElementById("tlPreset7dBtn");
+    const tlPreset1dBtn = document.getElementById("tlPreset1dBtn");
+    const tlPreset1hBtn = document.getElementById("tlPreset1hBtn");
+    const tlPreset10mBtn = document.getElementById("tlPreset10mBtn");
+    const tlPresetBtns = Array.from(document.querySelectorAll(".tl-preset-btn"));
+    const tlOverviewTicks = document.getElementById("tlOverviewTicks");
+    const tlOverviewBar = document.getElementById("tlOverviewBar");
+    const tlOverviewWindow = document.getElementById("tlOverviewWindow");
+    const tlOverviewInfo = document.getElementById("tlOverviewInfo");
+    const tlOverviewLeftLabel = document.getElementById("tlOverviewLeftLabel");
+    const tlOverviewRightLabel = document.getElementById("tlOverviewRightLabel");
+    const tlZoomLabel = document.getElementById("tlZoomLabel");
+    const tlCurrentTicks = document.getElementById("tlCurrentTicks");
+    const tlTitle = document.getElementById("tlTitle");
+    const tlStatus = document.getElementById("tlStatus");
+
+    const tlLeftLabel = document.getElementById("tlLeftLabel");
+    const tlRightLabel = document.getElementById("tlRightLabel");
+
+    const tlPlayer = document.getElementById("tlPlayer");
+    const tlCursor = document.getElementById("tlCursor");
+    const tlCursorLabel = document.getElementById("tlCursorLabel");
+
+    const tlEventList = document.getElementById("tlEventList");
+    const tlClearEventsBtn = document.getElementById("tlClearEventsBtn");
+    const clipStartInput = document.getElementById("clipStartInput");
+    const clipEndInput = document.getElementById("clipEndInput");
+    const clipLabelInput = document.getElementById("clipLabelInput");
+    const clipSaveBtn = document.getElementById("clipSaveBtn");
+    const clipSaveNotice = document.getElementById("clipSaveNotice");
+
+    let tlWindowStart = null;
+    let tlWindowEnd = null;
+    let tlFullStart = null;
+    let tlFullEnd = null;
+    let tlAllEvents = [];
+    let tlAllSegments = [];
+    let tlClipStartTs = null;
+    let tlClipEndTs = null;
+    let tlBoundaryDragging = false;
+    let tlIgnoreNextBarClick = false;
+    let tlPlayingSegmentStartTs = null;
+    
+    function toLocalInputValue(ts) {
+      const d = new Date(Number(ts) * 1000);
+      const pad = n => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function fromLocalInputValue(v) {
+      if (!v) return null;
+      const ms = new Date(v).getTime();
+      if (!Number.isFinite(ms)) return null;
+      return Math.floor(ms / 1000);
+    }
+
+    function getTimelineHours() {
+      return Math.max(1, Number(tlHoursSelect?.value || 24));
+    }
+
+    function getTimelineSearchQuery() {
+      return (searchFilter?.value || "").trim().toLowerCase();
+    }
+
+    function getTimelineActionFilter() {
+      return (tlActionFilter?.value || "").trim().toLowerCase();
+    }
+
+    function eventMatchesSearch(ev) {
+      const label = String(ev.label || "").toLowerCase();
+      const q = getTimelineSearchQuery();
+      const action = getTimelineActionFilter();
+
+      // Action dropdown filter:
+      // All = show Punching and Kicking stamps
+      // Punching = show only red Punching stamps
+      // Kicking = show only orange Kicking stamps
+      if (action && !label.includes(action)) return false;
+
+      // Search box filter still works together with the dropdown.
+      if (q && !label.includes(q)) return false;
+
+      return true;
+    }
+
+    function fillManualClip(ev) {
+      const a = Number(ev.ts_start || 0);
+      const b = Number(ev.ts_end || (a + 10));
+      const startTs = Math.max(0, a - 2);
+      const endTs = Math.max(a + 1, b + 2);
+      setManualClipRange(startTs, endTs, ev.label || "Manual");
+    }
+
+    function setTlStatus(msg, isErr = false) {
+      if (!tlStatus) return;
+      tlStatus.textContent = msg;
+      tlStatus.classList.toggle("error", !!isErr);
+      tlStatus.classList.toggle("err", !!isErr);
+    }
+
+    function openVideoModal(url, title) {
+      try {
+        modalTitle.textContent = title || "Recording";
+        modalVideo.pause();
+        modalVideo.src = withToken(url);
+        modalVideo.load();
+        modal.classList.add("show");
+        modalVideo.play().catch(() => {});
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function openClipUrl(clipUrl, title) {
+      const base = getBackendHttpBase();
+      openVideoModal(base + clipUrl, title || "Recording");
+    }
+
+    function setTlLabels(a, b) {
+      if (tlLeftLabel) tlLeftLabel.textContent = fmtTs(a);
+      if (tlRightLabel) tlRightLabel.textContent = fmtTs(b);
+    }
+
+    function clearTlBarKeepCursor() {
+      if (!tlBar) return;
+      tlBar.innerHTML = '<div id="tlCursorLine" class="timeline-cursor" style="left:100%;"></div>';
+    }
+
+    function clampTimelineTs(ts) {
+      if (tlWindowStart == null || tlWindowEnd == null) return Number(ts || 0);
+      return Math.max(tlWindowStart, Math.min(tlWindowEnd, Number(ts || 0)));
+    }
+
+    function tsToTimelinePct(ts) {
+      if (tlWindowStart == null || tlWindowEnd == null) return 0;
+      const span = tlWindowEnd - tlWindowStart;
+      if (span <= 0) return 0;
+      return Math.max(0, Math.min(100, ((Number(ts) - tlWindowStart) / span) * 100));
+    }
+
+    function clientXToTimelineTs(clientX) {
+      if (!tlBar || tlWindowStart == null || tlWindowEnd == null) return 0;
+      const rect = tlBar.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (clientX - rect.left) / Math.max(1, rect.width)));
+      return Math.round(tlWindowStart + pct * (tlWindowEnd - tlWindowStart));
+    }
+
+    function ensureClipMarkers() {
+      if (!tlBar) return;
+
+      let range = document.getElementById("tlClipRange");
+      if (!range) {
+        range = document.createElement("div");
+        range.id = "tlClipRange";
+        range.className = "timeline-clip-range";
+        tlBar.appendChild(range);
+      }
+
+      let start = document.getElementById("tlStartMarker");
+      if (!start) {
+        start = document.createElement("div");
+        start.id = "tlStartMarker";
+        start.className = "timeline-boundary-marker timeline-start-marker";
+        start.title = "Clip start";
+        start.innerHTML = "<span>Start</span>";
+        tlBar.appendChild(start);
+        setupBoundaryDrag(start, "start");
+      }
+
+      let end = document.getElementById("tlEndMarker");
+      if (!end) {
+        end = document.createElement("div");
+        end.id = "tlEndMarker";
+        end.className = "timeline-boundary-marker timeline-end-marker";
+        end.title = "Clip end";
+        end.innerHTML = "<span>End</span>";
+        tlBar.appendChild(end);
+        setupBoundaryDrag(end, "end");
+      }
+    }
+
+    function updateManualInputsFromBoundary() {
+      if (tlClipStartTs == null || tlClipEndTs == null) return;
+      if (clipStartInput) clipStartInput.value = toLocalInputValue(tlClipStartTs);
+      if (clipEndInput) clipEndInput.value = toLocalInputValue(tlClipEndTs);
+    }
+
+    function updateClipMarkersVisual() {
+      ensureClipMarkers();
+      const start = document.getElementById("tlStartMarker");
+      const end = document.getElementById("tlEndMarker");
+      const range = document.getElementById("tlClipRange");
+      if (!start || !end || !range || tlClipStartTs == null || tlClipEndTs == null) return;
+
+      const aPct = tsToTimelinePct(tlClipStartTs);
+      const bPct = tsToTimelinePct(tlClipEndTs);
+
+      // Keep each marker tied to its real timestamp.
+      // Do not visually push the other marker away when they get close.
+      const left = Math.min(aPct, bPct);
+      const width = Math.abs(bPct - aPct);
+
+      start.style.left = `${aPct}%`;
+      end.style.left = `${bPct}%`;
+      range.style.left = `${left}%`;
+      range.style.width = `${Math.max(0.18, width)}%`;
+
+      start.title = `Clip start: ${fmtTs(tlClipStartTs)}`;
+      end.title = `Clip end: ${fmtTs(tlClipEndTs)}`;
+    }
+
+    function updateClipMarkersFromInputs() {
+      const a = fromLocalInputValue(clipStartInput?.value);
+      const b = fromLocalInputValue(clipEndInput?.value);
+      if (a == null || b == null) return;
+
+      tlClipStartTs = clampTimelineTs(a);
+      tlClipEndTs = clampTimelineTs(b);
+      if (tlClipEndTs <= tlClipStartTs) tlClipEndTs = Math.min(tlWindowEnd || (tlClipStartTs + 1), tlClipStartTs + 1);
+
+      updateManualInputsFromBoundary();
+      updateClipMarkersVisual();
+    }
+
+    function setManualClipRange(startTs, endTs, label) {
+      tlClipStartTs = clampTimelineTs(startTs);
+      tlClipEndTs = clampTimelineTs(endTs);
+      if (tlClipEndTs <= tlClipStartTs) tlClipEndTs = Math.min(tlWindowEnd || (tlClipStartTs + 1), tlClipStartTs + 1);
+
+      updateManualInputsFromBoundary();
+      if (clipLabelInput) clipLabelInput.value = label || "Manual";
+      updateClipMarkersVisual();
+    }
+
+    function setupBoundaryDrag(marker, which) {
+      if (!marker) return;
+
+      marker.addEventListener("dragstart", (e) => e.preventDefault());
+
+      const moveBoundaryToClientX = (clientX) => {
+        if (tlWindowStart == null || tlWindowEnd == null) return;
+
+        const rawTs = clampTimelineTs(clientXToTimelineTs(clientX));
+        const minGap = 1; // 1 second minimum only; users can save short clips such as 10 seconds
+
+        if (which === "start") {
+          const maxStart = (tlClipEndTs != null) ? (tlClipEndTs - minGap) : (tlWindowEnd - minGap);
+          tlClipStartTs = Math.max(tlWindowStart, Math.min(rawTs, maxStart));
+
+          // If End is not set yet, set it once. After that, dragging Start will not move End.
+          if (tlClipEndTs == null) {
+            tlClipEndTs = Math.min(tlWindowEnd, tlClipStartTs + minGap);
+          }
+        } else {
+          const minEnd = (tlClipStartTs != null) ? (tlClipStartTs + minGap) : (tlWindowStart + minGap);
+          tlClipEndTs = Math.min(tlWindowEnd, Math.max(rawTs, minEnd));
+
+          // If Start is not set yet, set it once. After that, dragging End will not move Start.
+          if (tlClipStartTs == null) {
+            tlClipStartTs = Math.max(tlWindowStart, tlClipEndTs - minGap);
+          }
+        }
+
+        updateManualInputsFromBoundary();
+        updateClipMarkersVisual();
+      };
+
+      const startDrag = (clientX, e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+
+        tlBoundaryDragging = true;
+        tlIgnoreNextBarClick = true;
+        marker.classList.add("dragging");
+        document.body.classList.add("is-dragging-timeline-marker");
+
+        // Move immediately on first press, so the user sees feedback right away.
+        moveBoundaryToClientX(clientX);
+
+        const onPointerMove = (ev) => {
+          ev.preventDefault();
+          moveBoundaryToClientX(ev.clientX);
+        };
+
+        const onMouseMove = (ev) => {
+          ev.preventDefault();
+          moveBoundaryToClientX(ev.clientX);
+        };
+
+        const onTouchMove = (ev) => {
+          if (!ev.touches || !ev.touches.length) return;
+          ev.preventDefault();
+          moveBoundaryToClientX(ev.touches[0].clientX);
+        };
+
+        const stopDrag = () => {
+          tlBoundaryDragging = false;
+          marker.classList.remove("dragging");
+          document.body.classList.remove("is-dragging-timeline-marker");
+
+          window.removeEventListener("pointermove", onPointerMove, true);
+          window.removeEventListener("pointerup", stopDrag, true);
+          window.removeEventListener("pointercancel", stopDrag, true);
+          window.removeEventListener("mousemove", onMouseMove, true);
+          window.removeEventListener("mouseup", stopDrag, true);
+          window.removeEventListener("touchmove", onTouchMove, true);
+          window.removeEventListener("touchend", stopDrag, true);
+          window.removeEventListener("touchcancel", stopDrag, true);
+
+          setTimeout(() => { tlIgnoreNextBarClick = false; }, 150);
+        };
+
+        window.addEventListener("pointermove", onPointerMove, true);
+        window.addEventListener("pointerup", stopDrag, true);
+        window.addEventListener("pointercancel", stopDrag, true);
+        window.addEventListener("mousemove", onMouseMove, true);
+        window.addEventListener("mouseup", stopDrag, true);
+        window.addEventListener("touchmove", onTouchMove, { capture: true, passive: false });
+        window.addEventListener("touchend", stopDrag, true);
+        window.addEventListener("touchcancel", stopDrag, true);
+      };
+
+      marker.addEventListener("pointerdown", (e) => {
+        try { marker.setPointerCapture?.(e.pointerId); } catch (_) {}
+        startDrag(e.clientX, e);
+      });
+
+      // Mouse fallback for Electron/Chromium builds where pointer capture can be inconsistent.
+      marker.addEventListener("mousedown", (e) => startDrag(e.clientX, e));
+
+      marker.addEventListener("touchstart", (e) => {
+        if (!e.touches || !e.touches.length) return;
+        startDrag(e.touches[0].clientX, e);
+      }, { passive: false });
+    }
+
+    function setTlCursor(ts) {
+      if (!tlCursor || tlWindowStart == null || tlWindowEnd == null) return;
+      const span = (tlWindowEnd - tlWindowStart);
+      if (span <= 0) return;
+
+      const pct = ((ts - tlWindowStart) / span) * 100;
+      const clamped = Math.max(0, Math.min(100, pct));
+
+      tlCursor.value = String(clamped);
+      if (tlCursorLabel) {
+        tlCursorLabel.textContent = fmtTs(ts);
+        tlCursorLabel.dataset.ts = String(Math.floor(ts));
+      }
+
+      const line = document.getElementById("tlCursorLine");
+      if (line) line.style.left = `${clamped}%`;
+    }
+
+
+    function fmtTimelineCompact(ts) {
+      try {
+        const d = new Date(Number(ts) * 1000);
+        return d.toLocaleString([], {
+          month: "short",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      } catch (_) {
+        return String(ts);
+      }
+    }
+
+    function fmtTimelineWeekday(ts) {
+      try {
+        return new Date(Number(ts) * 1000).toLocaleString([], { weekday: "short" });
+      } catch (_) {
+        return "";
+      }
+    }
+
+    function fmtTimelineDay(ts) {
+      try {
+        return new Date(Number(ts) * 1000).toLocaleString([], { month: "short", day: "numeric" });
+      } catch (_) {
+        return String(ts);
+      }
+    }
+
+    function fmtTimelineTime(ts) {
+      try {
+        return new Date(Number(ts) * 1000).toLocaleString([], { hour: "numeric", minute: "2-digit" });
+      } catch (_) {
+        return String(ts);
+      }
+    }
+
+    function floorTimelineTick(ts, stepSeconds) {
+      const d = new Date(Number(ts) * 1000);
+      if (stepSeconds >= 86400) {
+        d.setHours(0, 0, 0, 0);
+        return Math.floor(d.getTime() / 1000);
+      }
+      if (stepSeconds >= 3600) {
+        d.setMinutes(0, 0, 0);
+        const stepH = Math.max(1, Math.round(stepSeconds / 3600));
+        d.setHours(Math.floor(d.getHours() / stepH) * stepH);
+        return Math.floor(d.getTime() / 1000);
+      }
+      d.setSeconds(0, 0);
+      const stepM = Math.max(1, Math.round(stepSeconds / 60));
+      d.setMinutes(Math.floor(d.getMinutes() / stepM) * stepM);
+      return Math.floor(d.getTime() / 1000);
+    }
+
+    function chooseOverviewTickStep(spanSeconds) {
+      const s = Math.max(1, Number(spanSeconds || 0));
+      if (s >= 25 * 86400) return 2 * 86400;
+      if (s >= 10 * 86400) return 86400;
+      if (s >= 4 * 86400) return 12 * 3600;
+      if (s >= 86400) return 6 * 3600;
+      if (s >= 12 * 3600) return 2 * 3600;
+      return 3600;
+    }
+
+    function chooseCurrentTickStep(spanSeconds) {
+      const s = Math.max(1, Number(spanSeconds || 0));
+      if (s >= 6 * 86400) return 86400;
+      if (s >= 3 * 86400) return 12 * 3600;
+      if (s >= 86400) return 6 * 3600;
+      if (s >= 12 * 3600) return 2 * 3600;
+      if (s >= 4 * 3600) return 3600;
+      if (s >= 2 * 3600) return 30 * 60;
+      if (s >= 3600) return 15 * 60;
+      return 10 * 60;
+    }
+
+    function makeTickLabelHTML(ts, stepSeconds) {
+      if (stepSeconds >= 86400) {
+        return `<span class="tick-primary">${fmtTimelineDay(ts)}</span><span class="tick-secondary">${fmtTimelineWeekday(ts)}</span>`;
+      }
+      if (stepSeconds >= 3600) {
+        return `<span class="tick-primary">${fmtTimelineDay(ts)}</span><span class="tick-secondary">${fmtTimelineTime(ts)}</span>`;
+      }
+      return `<span class="tick-primary">${fmtTimelineTime(ts)}</span>`;
+    }
+
+    function renderOverviewDateTicks() {
+      if (!tlOverviewTicks || tlFullStart == null || tlFullEnd == null) return;
+      tlOverviewTicks.innerHTML = '';
+      const span = Math.max(1, tlFullEnd - tlFullStart);
+      const step = chooseOverviewTickStep(span);
+      let ts = floorTimelineTick(tlFullStart, step);
+      if (ts < tlFullStart) ts += step;
+      let count = 0;
+      while (ts < tlFullEnd && count < 200) {
+        const pct = ((ts - tlFullStart) / span) * 100;
+        const tick = document.createElement('div');
+        tick.className = 'timeline-overview-tick';
+        tick.style.left = `${pct}%`;
+
+        const label = document.createElement('div');
+        label.className = 'timeline-overview-tick-label';
+        label.innerHTML = makeTickLabelHTML(ts, step);
+        tick.appendChild(label);
+
+        const line = document.createElement('div');
+        line.className = 'timeline-overview-tick-line';
+        tick.appendChild(line);
+
+        tlOverviewTicks.appendChild(tick);
+        ts += step;
+        count += 1;
+      }
+    }
+
+    function renderCurrentTimelineTicks() {
+      if (!tlCurrentTicks || tlWindowStart == null || tlWindowEnd == null) return;
+      tlCurrentTicks.innerHTML = '';
+      const span = Math.max(1, tlWindowEnd - tlWindowStart);
+      const step = chooseCurrentTickStep(span);
+      let ts = floorTimelineTick(tlWindowStart, step);
+      if (ts < tlWindowStart) ts += step;
+      let count = 0;
+      while (ts < tlWindowEnd && count < 200) {
+        const pct = ((ts - tlWindowStart) / span) * 100;
+        const tick = document.createElement('div');
+        tick.className = 'timeline-current-tick';
+        tick.style.left = `${pct}%`;
+
+        const label = document.createElement('div');
+        label.className = 'timeline-current-tick-label';
+        label.innerHTML = makeTickLabelHTML(ts, step);
+        tick.appendChild(label);
+
+        const line = document.createElement('div');
+        line.className = 'timeline-current-tick-line';
+        tick.appendChild(line);
+
+        tlCurrentTicks.appendChild(tick);
+        ts += step;
+        count += 1;
+      }
+    }
+
+    function formatTimelineSpan(seconds) {
+      seconds = Math.max(1, Number(seconds || 0));
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      if (days > 0) return `${days}d ${hours}h`;
+      if (hours > 0) return `${hours}h ${minutes}m`;
+      return `${minutes || 1}m`;
+    }
+
+    function clearActiveZoomPreset() {
+      tlPresetBtns.forEach(btn => btn.classList.remove("is-active"));
+    }
+
+    function syncActiveZoomPreset() {
+      if (!tlPresetBtns.length || tlWindowStart == null || tlWindowEnd == null) return;
+
+      const visibleSeconds = Math.round(tlWindowEnd - tlWindowStart);
+      let matched = false;
+
+      tlPresetBtns.forEach(btn => {
+        const presetSeconds = Number(btn.dataset.presetSeconds || 0);
+
+        // Allow a small tolerance because timeline values are rounded to seconds.
+        const tolerance = presetSeconds <= 3600 ? 5 : 60;
+        const isMatch = presetSeconds > 0 && Math.abs(visibleSeconds - presetSeconds) <= tolerance;
+
+        btn.classList.toggle("is-active", isMatch);
+        btn.setAttribute("aria-pressed", isMatch ? "true" : "false");
+        if (isMatch) matched = true;
+      });
+
+      // If user used +, -, drag overview, or pan and the view is not an exact preset,
+      // do not highlight any preset button.
+      if (!matched) clearActiveZoomPreset();
+    }
+
+    function updateTimelineZoomLabel() {
+      if (!tlZoomLabel || tlWindowStart == null || tlWindowEnd == null) return;
+      const full = (tlFullStart != null && tlFullEnd != null) ? Math.max(1, tlFullEnd - tlFullStart) : 1;
+      const current = Math.max(1, tlWindowEnd - tlWindowStart);
+      const pct = Math.max(1, Math.round((current / full) * 100));
+      tlZoomLabel.textContent = `Viewing: ${fmtTimelineCompact(tlWindowStart)} to ${fmtTimelineCompact(tlWindowEnd)} (${formatTimelineSpan(current)}, ${pct}% of selected range)`;
+    }
+
+    function setTimelineWindow(startTs, endTs) {
+      if (tlFullStart == null || tlFullEnd == null) return;
+      let start = Number(startTs);
+      let end = Number(endTs);
+      const fullSpan = Math.max(1, tlFullEnd - tlFullStart);
+      let span = Math.max(60, end - start);
+      span = Math.min(span, fullSpan);
+
+      if (start < tlFullStart) {
+        start = tlFullStart;
+        end = start + span;
+      }
+      if (end > tlFullEnd) {
+        end = tlFullEnd;
+        start = end - span;
+      }
+      start = Math.max(tlFullStart, start);
+      end = Math.min(tlFullEnd, end);
+
+      tlWindowStart = Math.floor(start);
+      tlWindowEnd = Math.floor(end);
+      setTlLabels(tlWindowStart, tlWindowEnd);
+      updateTimelineZoomLabel();
+    }
+
+    function timelineEventsInView() {
+      return (tlAllEvents || [])
+        .filter(eventMatchesSearch)
+        .filter(ev => Number(ev.ts_end || 0) >= tlWindowStart && Number(ev.ts_start || 0) <= tlWindowEnd);
+    }
+
+    function timelineSegmentsInView() {
+      return (tlAllSegments || [])
+        .filter(s => Number(s.ts_end || 0) >= tlWindowStart && Number(s.ts_start || 0) <= tlWindowEnd);
+    }
+
+
+    function fullRangePct(ts) {
+      if (tlFullStart == null || tlFullEnd == null) return 0;
+      const span = Math.max(1, tlFullEnd - tlFullStart);
+      return Math.max(0, Math.min(100, ((Number(ts) - tlFullStart) / span) * 100));
+    }
+
+    function renderTimelineOverview() {
+      if (!tlOverviewBar || !tlOverviewWindow || tlFullStart == null || tlFullEnd == null || tlWindowStart == null || tlWindowEnd == null) return;
+
+      // Remove old overview items but keep the draggable window element.
+      tlOverviewBar.querySelectorAll(".tl-overview-cov, .tl-overview-event").forEach(el => el.remove());
+
+      const fullSpan = Math.max(1, tlFullEnd - tlFullStart);
+      const visibleSpan = Math.max(1, tlWindowEnd - tlWindowStart);
+      const visiblePct = Math.max(1, Math.round((visibleSpan / fullSpan) * 100));
+
+      if (tlOverviewLeftLabel) tlOverviewLeftLabel.textContent = fmtTimelineCompact(tlFullStart);
+      if (tlOverviewRightLabel) tlOverviewRightLabel.textContent = fmtTimelineCompact(tlFullEnd);
+      if (tlOverviewInfo) {
+        tlOverviewInfo.textContent = `Visible window: ${fmtTimelineCompact(tlWindowStart)} to ${fmtTimelineCompact(tlWindowEnd)} (${formatTimelineSpan(visibleSpan)}, ${visiblePct}%)`;
+      }
+
+      // Full-range continuous recording coverage.
+      (tlAllSegments || []).forEach(s => {
+        const a = Math.max(tlFullStart, Number(s.ts_start));
+        const b = Math.min(tlFullEnd, Number(s.ts_end));
+        if (!Number.isFinite(a) || !Number.isFinite(b) || b <= a) return;
+        const cov = document.createElement("div");
+        cov.className = "tl-overview-cov";
+        cov.style.left = `${fullRangePct(a)}%`;
+        cov.style.width = `${Math.max(0.15, fullRangePct(b) - fullRangePct(a))}%`;
+        cov.title = `Available: ${fmtTs(a)} to ${fmtTs(b)}`;
+        tlOverviewBar.insertBefore(cov, tlOverviewWindow);
+      });
+
+      // Full-range event dots/lines using current Action/Search filters.
+      (tlAllEvents || []).filter(eventMatchesSearch).forEach(ev => {
+        const a = Number(ev.ts_start);
+        const b = Number(ev.ts_end || ev.ts_start);
+        if (!Number.isFinite(a) || a > tlFullEnd || b < tlFullStart) return;
+        const marker = document.createElement("div");
+        const cls = actionToTimelineClass(ev.label, ev.conf ?? 0);
+        marker.className = `tl-overview-event ${cls}`;
+        marker.style.left = `${fullRangePct(a)}%`;
+        marker.title = `${ev.label} - ${fmtTs(a)}`;
+        marker.addEventListener("click", (e) => {
+          e.stopPropagation();
+          zoomToEvent(ev);
+          fillManualClip(ev);
+          const clickedTs = clientXToTimelineTs(e.clientX);
+          setTlCursor(clickedTs);
+          playAtTs(clickedTs);
+        });
+        tlOverviewBar.insertBefore(marker, tlOverviewWindow);
+      });
+
+      const left = fullRangePct(tlWindowStart);
+      const width = Math.max(1.2, fullRangePct(tlWindowEnd) - fullRangePct(tlWindowStart));
+      tlOverviewWindow.style.left = `${left}%`;
+      tlOverviewWindow.style.width = `${width}%`;
+      tlOverviewWindow.title = `Current view: ${fmtTs(tlWindowStart)} to ${fmtTs(tlWindowEnd)}. Drag to move.`;
+    }
+
+    function overviewClientXToTs(clientX) {
+      if (!tlOverviewBar || tlFullStart == null || tlFullEnd == null) return 0;
+      const rect = tlOverviewBar.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (clientX - rect.left) / Math.max(1, rect.width)));
+      return Math.round(tlFullStart + pct * (tlFullEnd - tlFullStart));
+    }
+
+    function setupOverviewDrag() {
+      if (!tlOverviewWindow || !tlOverviewBar) return;
+      let startClientX = 0;
+      let startWindowStart = 0;
+      let startWindowEnd = 0;
+
+      tlOverviewWindow.addEventListener("pointerdown", (e) => {
+        if (tlFullStart == null || tlFullEnd == null || tlWindowStart == null || tlWindowEnd == null) return;
+        e.preventDefault();
+        e.stopPropagation();
+        tlOverviewWindow.setPointerCapture?.(e.pointerId);
+        tlOverviewWindow.classList.add("dragging");
+        startClientX = e.clientX;
+        startWindowStart = tlWindowStart;
+        startWindowEnd = tlWindowEnd;
+
+        const rect = tlOverviewBar.getBoundingClientRect();
+        const fullSpan = Math.max(1, tlFullEnd - tlFullStart);
+        const secondsPerPixel = fullSpan / Math.max(1, rect.width);
+
+        const onMove = (ev) => {
+          const dx = ev.clientX - startClientX;
+          const shift = Math.round(dx * secondsPerPixel);
+          setTimelineWindow(startWindowStart + shift, startWindowEnd + shift);
+          renderTimelineFromCache();
+        };
+
+        const onUp = () => {
+          tlOverviewWindow.classList.remove("dragging");
+          window.removeEventListener("pointermove", onMove);
+          window.removeEventListener("pointerup", onUp);
+        };
+
+        window.addEventListener("pointermove", onMove);
+        window.addEventListener("pointerup", onUp, { once: true });
+      });
+
+      tlOverviewBar.addEventListener("click", (e) => {
+        if (e.target === tlOverviewWindow) return;
+        if (tlFullStart == null || tlFullEnd == null || tlWindowStart == null || tlWindowEnd == null) return;
+        const span = Math.max(60, tlWindowEnd - tlWindowStart);
+        const center = overviewClientXToTs(e.clientX);
+        setTimelineWindow(center - span / 2, center + span / 2);
+        renderTimelineFromCache();
+      });
+    }
+
+    function zoomToSpanSeconds(seconds) {
+      if (tlFullStart == null || tlFullEnd == null) return;
+      const fullSpan = Math.max(1, tlFullEnd - tlFullStart);
+      const span = Math.min(Math.max(5 * 60, Number(seconds || fullSpan)), fullSpan);
+      const centerCandidate = Number(tlCursorLabel?.dataset?.ts || NaN);
+      const center = Number.isFinite(centerCandidate)
+        ? centerCandidate
+        : Math.round(((tlWindowStart || tlFullStart) + (tlWindowEnd || tlFullEnd)) / 2);
+      setTimelineWindow(center - span / 2, center + span / 2);
+      renderTimelineFromCache();
+    }
+
+    function zoomToEvent(ev) {
+      if (!ev || tlFullStart == null || tlFullEnd == null) return;
+      const start = Number(ev.ts_start || 0);
+      const end = Number(ev.ts_end || (start + 10));
+      if (!Number.isFinite(start) || !Number.isFinite(end)) return;
+
+      // Show enough context around the action so users can export before/after footage.
+      const pad = 2 * 60;
+      let a = start - pad;
+      let b = end + pad;
+      const minSpan = 10 * 60;
+      if ((b - a) < minSpan) {
+        const c = Math.round((start + end) / 2);
+        a = c - minSpan / 2;
+        b = c + minSpan / 2;
+      }
+      setTimelineWindow(a, b);
+      renderTimelineFromCache();
+    }
+
+    function renderTimelineFromCache() {
+      if (tlWindowStart == null || tlWindowEnd == null) return;
+      const events = timelineEventsInView();
+      const segItems = timelineSegmentsInView();
+
+      clearTlBarKeepCursor();
+      renderTlCoverage(segItems);
+      renderTlSegments(events);
+      renderTlEventList(events);
+      ensureClipMarkers();
+      updateClipMarkersFromInputs();
+      setTlCursor(Math.min(tlWindowEnd, Math.max(tlWindowStart, Number(tlCursorLabel?.dataset?.ts || tlWindowEnd))));
+      updateTimelineZoomLabel();
+      renderOverviewDateTicks();
+      renderCurrentTimelineTicks();
+      renderTimelineOverview();
+      syncActiveZoomPreset();
+
+      if (tlTitle) {
+        const rangeText = tlHoursSelect?.selectedOptions?.[0]?.textContent || getTimelineHours() + " hours";
+        const actionText = tlActionFilter?.selectedOptions?.[0]?.textContent || "All";
+        const zoomText = (tlFullStart != null && tlFullEnd != null && (tlWindowEnd - tlWindowStart) < ((tlFullEnd - tlFullStart) - 5))
+          ? ` • zoomed ${formatTimelineSpan(tlWindowEnd - tlWindowStart)}`
+          : "";
+        tlTitle.textContent = actionText && actionText !== "All"
+          ? `Timeline (${rangeText}) - ${actionText}${zoomText}`
+          : `Timeline (${rangeText})${zoomText}`;
+      }
+    }
+
+    function zoomTimeline(multiplier) {
+      if (tlFullStart == null || tlFullEnd == null || tlWindowStart == null || tlWindowEnd == null) return;
+      const fullSpan = Math.max(1, tlFullEnd - tlFullStart);
+      const currentSpan = Math.max(1, tlWindowEnd - tlWindowStart);
+      const minSpan = 5 * 60; // 5 minutes minimum view
+      let newSpan = Math.round(currentSpan * multiplier);
+      newSpan = Math.max(minSpan, Math.min(fullSpan, newSpan));
+
+      const center = Math.round((tlWindowStart + tlWindowEnd) / 2);
+      setTimelineWindow(center - newSpan / 2, center + newSpan / 2);
+      renderTimelineFromCache();
+    }
+
+    function panTimeline(direction) {
+      if (tlFullStart == null || tlFullEnd == null || tlWindowStart == null || tlWindowEnd == null) return;
+      const span = Math.max(1, tlWindowEnd - tlWindowStart);
+      const shift = Math.max(60, Math.round(span * 0.50));
+      setTimelineWindow(tlWindowStart + (direction * shift), tlWindowEnd + (direction * shift));
+      renderTimelineFromCache();
+    }
+
+    function resetTimelineZoom() {
+      if (tlFullStart == null || tlFullEnd == null) return;
+      setTimelineWindow(tlFullStart, tlFullEnd);
+      renderTimelineFromCache();
+    }
+
+    function renderTlCoverage(segments) {
+      if (!tlBar || tlWindowStart == null || tlWindowEnd == null) return;
+      const span = (tlWindowEnd - tlWindowStart);
+      if (span <= 0) return;
+
+      (segments || []).forEach(s => {
+        const a = Math.max(tlWindowStart, Number(s.ts_start));
+        const b = Math.min(tlWindowEnd, Number(s.ts_end));
+        if (!Number.isFinite(a) || !Number.isFinite(b) || b <= a) return;
+
+        const left = ((a - tlWindowStart) / span) * 100;
+        const width = ((b - a) / span) * 100;
+
+        const cov = document.createElement("div");
+        cov.className = "timeline-cov";
+        cov.style.left = `${left}%`;
+        cov.style.width = `${Math.max(0.2, width)}%`;
+        cov.title = `Continuous available: ${fmtTs(a)}`;
+
+        cov.addEventListener("click", (e) => {
+          e.stopPropagation();
+          
+          const ts = clientXToTimelineTs(e.clientX);
+          setTlCursor(ts);
+          playAtTs(ts);
+        });
+
+        tlBar.appendChild(cov);
+      });
+    }
+
+    function renderTlSegments(events) {
+      if (!tlBar || tlWindowStart == null || tlWindowEnd == null) return;
+      const span = (tlWindowEnd - tlWindowStart);
+      if (span <= 0) return;
+
+      events.forEach(ev => {
+        const a = Math.max(tlWindowStart, Number(ev.ts_start));
+        const b = Math.min(tlWindowEnd, Number(ev.ts_end));
+        if (!Number.isFinite(a) || !Number.isFinite(b) || b <= a) return;
+
+        const left = ((a - tlWindowStart) / span) * 100;
+        const width = ((b - a) / span) * 100;
+
+        const seg = document.createElement("div");
+        const lvl = actionToTimelineClass(ev.label, ev.conf ?? 0);
+        seg.className = `timeline-seg ${lvl}`;
+
+        seg.style.left = `${left}%`;
+        seg.style.width = `${Math.max(0.5, width)}%`;
+        seg.title = `${ev.label} (${fmtTs(ev.ts_start)})`;
+
+        seg.addEventListener("click", (e) => {
+          e.stopPropagation();
+
+          tlBar.querySelectorAll(".timeline-seg.is-selected")
+            .forEach(n => n.classList.remove("is-selected"));
+
+          seg.classList.add("is-selected");
+
+          const clickedTs = clientXToTimelineTs(e.clientX);
+
+          fillManualClip(ev);
+          setTlCursor(clickedTs);
+          playAtTs(clickedTs);
+        });
+
+        tlBar.appendChild(seg);
+      });
+    }
+
+    function renderTlEventList(events) {
+      if (!tlEventList) return;
+      if (!events.length) {
+        tlEventList.innerHTML = `<div class="timeline-empty">No matching punching/kicking events in this window.</div>`;
+        return;
+      }
+
+      const base = getBackendHttpBase();
+
+      const sortedEvents = [...events].filter(eventMatchesSearch).sort((a, b) => Number(b.ts_start || 0) - Number(a.ts_start || 0));
+      tlEventList.innerHTML = sortedEvents.map(ev => {
+        const conf = (Number(ev.conf) || 0);
+        const confPct = (conf * 100).toFixed(1);
+        const clipBtn = ev.clip_url
+          ? `<button class="tl-chip" data-clip="${safeText(withToken(base + ev.clip_url))}" data-title="${safeText(ev.label)}">Open clip</button>`
+          : "";
+
+        return `
+          <div class="timeline-event">
+            <div class="timeline-event-main">
+              <div class="timeline-event-label">
+                ${safeText(ev.label)}
+                <span class="timeline-event-conf ${actionToTimelineClass(ev.label, ev.conf ?? 0)}">${safeText(confPct)}%</span>
+              </div>
+              <div class="timeline-event-time">${safeText(fmtTs(ev.ts_start))}</div>
+            </div>
+            <div class="timeline-event-actions">
+              <button class="tl-btn"
+                data-play="${safeText(ev.ts_start)}"
+                data-clip="${ev.clip_url ? safeText(withToken(base + ev.clip_url)) : ""}"
+                data-title="${safeText(ev.label)}">Play</button>
+              ${clipBtn}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      tlEventList.querySelectorAll("button[data-play]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const clip = (btn.getAttribute("data-clip") || "").trim();
+          const title = (btn.getAttribute("data-title") || "Recording");
+          if (clip) openVideoModal(clip, title);
+          else playAtTs(Number(btn.getAttribute("data-play")));
+        });
+      });
+
+      tlEventList.querySelectorAll("button[data-clip]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const url = btn.getAttribute("data-clip") || "";
+          const title = btn.getAttribute("data-title") || "Recording";
+          if (url) openVideoModal(url, title);
+        });
+      });
+    }
+
+    async function refreshTimeline() {
+      if (!tlCamSelect) return;
+      const cam = Number(tlCamSelect.value || 0);
+      const base = getBackendHttpBase();
+      const token = (localStorage.getItem("gv_token") || "");
+
+      setTlStatus("Loading timeline…");
+
+      try {
+        const [evRes, segRes] = await Promise.all([
+          fetch(`${base}/timeline/events?cam=${cam}&hours=${getTimelineHours()}`, {
+            headers: { "Authorization": "Bearer " + token, "X-Client-ID": "GV-Electron" }
+          }),
+          fetch(`${base}/timeline/segments?cam=${cam}&hours=${getTimelineHours()}`, {
+            headers: { "Authorization": "Bearer " + token, "X-Client-ID": "GV-Electron" }
+          }),
+        ]);
+
+        if (!evRes.ok) throw new Error(`HTTP ${evRes.status}`);
+        const evData = await evRes.json();
+        if (!evData.ok) throw new Error(evData.error || "timeline_failed");
+
+        tlFullStart = Number(evData.window_start);
+        tlFullEnd = Number(evData.window_end);
+        tlAllEvents = Array.isArray(evData.events) ? evData.events : [];
+
+        let segItems = [];
+        if (segRes && segRes.ok) {
+          try {
+            const segData = await segRes.json();
+            if (segData && segData.ok && Array.isArray(segData.items)) segItems = segData.items;
+          } catch (_) {}
+        }
+        tlAllSegments = segItems;
+
+        // New range/refresh starts at the full selected range. Use Zoom In/Out after loading.
+        setTimelineWindow(tlFullStart, tlFullEnd);
+
+        const inputStart = fromLocalInputValue(clipStartInput?.value);
+        const inputEnd = fromLocalInputValue(clipEndInput?.value);
+        if (inputStart == null || inputEnd == null) {
+          const defaultEnd = tlWindowEnd;
+          const defaultStart = Math.max(tlWindowStart, defaultEnd - 10);
+          setManualClipRange(defaultStart, defaultEnd, clipLabelInput?.value || "Manual");
+        }
+
+        renderTimelineFromCache();
+        setTlCursor(tlWindowEnd);
+        setTlStatus("Loaded.");
+
+      } catch (e) {
+        console.error(e);
+        setTlStatus(`Cannot load timeline: ${safeText(e?.message || e)}`, true);
+      }
+    }
+
+
+    async function clearDetectedEvents() {
+      if (!tlCamSelect) return;
+      const cam = Number(tlCamSelect.value || 0);
+      const base = getBackendHttpBase();
+      const token = (localStorage.getItem("gv_token") || "");
+      const rangeText = tlHoursSelect?.selectedOptions?.[0]?.textContent || `${getTimelineHours()} hours`;
+
+      if (!confirm(`Clear detected events for Cam ${cam + 1} in the current ${rangeText} timeline?\n\nThis will only remove event markers/list items. It will NOT delete continuous recordings or manually saved clips.`)) {
+        return;
+      }
+
+      setTlStatus("Clearing detected events…");
+      try {
+        const res = await fetch(`${base}/timeline/events?cam=${cam}&hours=${getTimelineHours()}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": "Bearer " + token,
+            "X-Client-ID": "GV-Electron"
+          }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || "clear_failed");
+
+        await refreshTimeline();
+        setTlStatus(`Cleared ${Number(data.deleted || 0)} detected event(s).`);
+      } catch (e) {
+        console.error(e);
+        setTlStatus(`Cannot clear events: ${safeText(e?.message || e)}`, true);
+      }
+    }
+
+    async function playAtTs(ts) {
+      if (!tlCamSelect || !tlPlayer) return;
+
+      const cam = Number(tlCamSelect.value || 0);
+      const base = getBackendHttpBase();
+      const token = (localStorage.getItem("gv_token") || "");
+
+      setTlStatus("Resolving video segment…");
+      setTlCursor(ts);
+
+      try {
+        const res = await fetch(`${base}/timeline/resolve?cam=${cam}&ts=${Math.floor(ts)}`, {
+          headers: {
+            "Authorization": "Bearer " + token,
+            "X-Client-ID": "GV-Electron"
+          }
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || "segment_not_found");
+
+        const url = withToken(base + data.segment_url);
+        const offset = Number(data.offset_seconds || 0);
+
+        // This estimates the actual segment start time.
+        // Example: clicked ts = 10:35:20, offset = 20s,
+        // segment start = 10:35:00.
+        tlPlayingSegmentStartTs = Math.floor(Number(ts) - offset);
+
+        tlPlayer.pause();
+        tlPlayer.src = url;
+        tlPlayer.load();
+
+        const onMeta = () => {
+          tlPlayer.removeEventListener("loadedmetadata", onMeta);
+
+          try {
+            tlPlayer.currentTime = Math.max(0, offset);
+          } catch (_) {}
+
+          tlPlayer.play().catch(() => {});
+        };
+
+        tlPlayer.addEventListener("loadedmetadata", onMeta);
+
+        setTlStatus(`Playing: ${fmtTs(ts)}`);
+
+      } catch (e) {
+        console.error(e);
+        setTlStatus(`Cannot play at this time: ${safeText(e?.message || e)}`, true);
+      }
+    }
+
+    function initTimeline() {
+      if (!tlBar || !tlCamSelect || !tlRefreshBtn) return;
+
+      tlRefreshBtn.addEventListener("click", refreshTimeline);
+      if (tlClearEventsBtn) tlClearEventsBtn.addEventListener("click", clearDetectedEvents);
+      if (tlActionFilter) tlActionFilter.addEventListener("change", renderTimelineFromCache);
+      if (tlHoursSelect) tlHoursSelect.addEventListener("change", refreshTimeline);
+      if (tlZoomInBtn) tlZoomInBtn.addEventListener("click", () => zoomTimeline(0.5));
+      if (tlZoomOutBtn) tlZoomOutBtn.addEventListener("click", () => zoomTimeline(2));
+      if (tlZoomResetBtn) tlZoomResetBtn.addEventListener("click", resetTimelineZoom);
+      if (tlPanLeftBtn) tlPanLeftBtn.addEventListener("click", () => panTimeline(-1));
+      if (tlPanRightBtn) tlPanRightBtn.addEventListener("click", () => panTimeline(1));
+      tlPresetBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const seconds = Number(btn.dataset.presetSeconds || 0);
+          if (!seconds) return;
+          zoomToSpanSeconds(seconds);
+        });
+      });
+      setupOverviewDrag();
+      if (clipStartInput) clipStartInput.addEventListener("change", updateClipMarkersFromInputs);
+      if (clipEndInput) clipEndInput.addEventListener("change", updateClipMarkersFromInputs);
+      tlCamSelect.addEventListener("change", () => {
+        try { tlPlayer.pause(); } catch (_) {}
+        refreshTimeline();
+      });
+
+      tlCursor.addEventListener("input", () => {
+        if (tlWindowStart == null || tlWindowEnd == null) return;
+        const pct = Number(tlCursor.value) / 100;
+        const ts = tlWindowStart + (tlWindowEnd - tlWindowStart) * pct;
+        setTlCursor(ts);
+      });
+
+      tlCursor.addEventListener("change", () => {
+        if (tlWindowStart == null || tlWindowEnd == null) return;
+        const pct = Number(tlCursor.value) / 100;
+        const ts = tlWindowStart + (tlWindowEnd - tlWindowStart) * pct;
+        playAtTs(ts);
+      });
+      
+      tlPlayer.addEventListener("timeupdate", () => {
+        if (tlPlayingSegmentStartTs == null) return;
+        if (tlWindowStart == null || tlWindowEnd == null) return;
+
+        const currentAbsoluteTs = tlPlayingSegmentStartTs + Number(tlPlayer.currentTime || 0);
+
+        if (currentAbsoluteTs >= tlWindowStart && currentAbsoluteTs <= tlWindowEnd) {
+          setTlCursor(currentAbsoluteTs);
+        }
+      });
+
+      if (clipSaveBtn) {
+        let isSavingClip = false;
+
+        clipSaveBtn.addEventListener("click", async () => {
+          if (isSavingClip) return;
+
+          const cam = Number(tlCamSelect?.value || 0);
+          const tsStart = fromLocalInputValue(clipStartInput?.value || "");
+          const tsEnd = fromLocalInputValue(clipEndInput?.value || "");
+          const label = (clipLabelInput?.value || "manual").trim();
+          const base = getBackendHttpBase();
+          const token = (localStorage.getItem("gv_token") || "");
+
+          if (!tsStart || !tsEnd || tsEnd <= tsStart) {
+            setTlStatus("Select a valid start and end time before saving.", true);
+            if (clipSaveNotice) {
+              clipSaveNotice.className = "clip-save-notice error";
+              clipSaveNotice.textContent = "Please select a valid start and end time. End must be after Start.";
+            }
+            return;
+          }
+
+          isSavingClip = true;
+          const originalBtnText = clipSaveBtn.textContent;
+          clipSaveBtn.disabled = true;
+          clipSaveBtn.classList.add("is-saving");
+          clipSaveBtn.textContent = "Saving clip...";
+          if (clipSaveNotice) {
+            clipSaveNotice.className = "clip-save-notice saving";
+            clipSaveNotice.textContent = "Saving selected clip. Please wait...";
+          }
+          setTlStatus("Saving selected clip…");
+
+          try {
+            const res = await fetch(`${base}/timeline/export`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+                "X-Client-ID": "GV-Electron"
+              },
+              body: JSON.stringify({ cam, ts_start: tsStart, ts_end: tsEnd, label })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+            const savedLocation = data.file
+              ? `manual_exports/${data.file}`
+              : (data.url || "Records / manual_exports");
+
+            setTlStatus(`Manual clip saved. Location: ${savedLocation}`);
+            if (clipSaveNotice) {
+              clipSaveNotice.className = "clip-save-notice success";
+              clipSaveNotice.innerHTML = `<strong>Clip saved successfully.</strong><br><span>Location: ${safeText(savedLocation)}</span>`;
+            }
+
+            openVideoModal(withToken(base + data.url), label || "Manual clip");
+            loadRecords();
+          } catch (e) {
+            console.error(e);
+            const errMsg = safeText(e?.message || e);
+            setTlStatus(`Cannot save clip: ${errMsg}`, true);
+            if (clipSaveNotice) {
+              clipSaveNotice.className = "clip-save-notice error";
+              clipSaveNotice.textContent = `Clip was not saved: ${errMsg}`;
+            }
+          } finally {
+            isSavingClip = false;
+            clipSaveBtn.disabled = false;
+            clipSaveBtn.classList.remove("is-saving");
+            clipSaveBtn.textContent = originalBtnText || "Save selected clip";
+          }
+        });
+      }
+
+      tlBar.addEventListener("click", (e) => {
+        if (tlIgnoreNextBarClick || tlBoundaryDragging || e.target.closest?.(".timeline-boundary-marker")) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        if (tlWindowStart == null || tlWindowEnd == null) return;
+
+        const rect = tlBar.getBoundingClientRect();
+        const x = Math.min(Math.max(0, e.clientX - rect.left), rect.width);
+        const pct = rect.width > 0 ? (x / rect.width) : 0;
+
+        const ts = tlWindowStart + (tlWindowEnd - tlWindowStart) * pct;
+        setTlCursor(ts);
+        playAtTs(ts);
+      });
+    }
+
+    // Init
+    loadRecords();
+    initTimeline();
+    refreshTimeline();
+  </script>
+
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const currentPage = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+        document.querySelectorAll("#sidebar .sidebar-link[href]").forEach(link => {
+          const href = (link.getAttribute("href") || "").toLowerCase();
+          if (href && href !== "#" && href === currentPage) {
+            link.classList.add("active");
+          }
+        });
+      });
+    </script>
+    <script>
+      const gridBtn = document.getElementById("gridViewBtn");
+      const listBtn = document.getElementById("listViewBtn");
+
+      gridBtn.addEventListener("click", () => {
+        gridBtn.classList.add("active");
+        listBtn.classList.remove("active");
+
+        recordsContainer.classList.remove("list-view");
+        recordsContainer.classList.add("grid-view");
+      });
+
+      listBtn.addEventListener("click", () => {
+        listBtn.classList.add("active");
+        gridBtn.classList.remove("active");
+
+        recordsContainer.classList.remove("grid-view");
+        recordsContainer.classList.add("list-view");
+      });
+    </script>
+
+</body>
+</html>

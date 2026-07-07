@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardian Vision</title>
+    <link rel="stylesheet" href="icons/lineicons/lineicons.css">
+    <link rel="stylesheet" href="profilestyle.css">
+</head>
+<body>
+
+    <div class="page-loader" id="pageLoader">
+        <div class="ring"></div>
+    </div>
+
+    <script>
+      // ✅ Require token (trim)
+      if (!((localStorage.getItem("gv_token") || "").trim())) {
+        window.location.replace("login.html");
+      }
+    </script>
+
+    <div class="container">
+        <aside id="sidebar">
+            <label for="toggler" class="toggle-btn">
+                <img src="image/GV_Logo_3.svg" alt="logo" class="logo">
+                <span>Guardian Vision</span>
+            </label>
+            <ul class="sidebar-nav">
+                <li class="sidebar-item">
+                    <a href="index.html" class="sidebar-link">
+                        <i class="lni lni-dashboard-square-1"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="records.html" class="sidebar-link">
+                        <i class="lni lni-database-2"></i>
+                        <span>Records</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="notifications.html" class="sidebar-link">
+                        <i class="lni lni-bell-1"></i>
+                        <span>Notifications</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="profile.html" class="sidebar-link">
+                        <i class="lni lni-user-4"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="settings.html" class="sidebar-link">
+                        <i class="lni lni-gear-1"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-link" onclick="logout()">
+                    <i class="lni lni-exit"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="main">
+            <div class="dashboard-navbar">
+                <form action="#">
+                    <div class="gv-header">
+                        <a href="#"><h2>Profile</h2></a>
+                    </div>
+                </form>
+                <div class="form-content">
+                    <ul class="main-nav">
+                        <li class="user-link">
+                            <a href="#">
+                                <img src="image/account.png" alt="Profile" class="avatar">
+                            </a>
+                            <div class="user-link-dropdown">
+                                <a href="#" class="dropdown-item">Profile</a>
+                                <a href="#" class="dropdown-item" onclick="logout()">Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content">
+
+                <div class="profile-wrapper">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <img src="image/account.png" alt="Profile" class="profile-avatar">
+                            <div>
+                                <h3 id="profileName">Loading...</h3>
+                                <p id="profileRole">Loading...</p>
+                            </div>
+                            <button class="edit-btn" onclick="toggleEdit()">
+                                <i class="lni lni-pencil"></i> Edit
+                            </button>
+                        </div>
+
+                        <!-- ✅ Admin Tools (only visible for admin) -->
+                        <div id="adminTools" style="display:none; margin: 10px 0 0 0;">
+                            <a href="admin_users.html" class="form-link" style="display:inline-block; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); text-decoration:none;">
+                                Admin: Manage Users
+                            </a>
+                        </div>
+
+                        <form id="profileForm">
+                            <div class="profile-field">
+                                <label>Full Name</label>
+                                <input type="text" id="nameInput" disabled>
+                            </div>
+
+                            <div class="profile-field">
+                                <label>Email</label>
+                                <input type="email" id="emailInput" disabled>
+                            </div>
+
+                            <div class="profile-field">
+                                <label>Role</label>
+                                <input type="text" id="roleInput" disabled>
+                            </div>
+
+                            <div class="profile-actions" style="display:none;">
+                                <button type="button" class="save-btn" onclick="saveProfile()">Save Changes</button>
+                                <button type="button" class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+                            </div>
+                        </form>
+
+                        <!-- ✅ Change Password -->
+                        <div style="margin-top: 18px;">
+                            <h3 style="margin: 0 0 10px 0;">Change Password</h3>
+
+                            <div class="profile-field">
+                                <label>Current Password</label>
+                                <input type="password" id="curPass">
+                            </div>
+
+                            <div class="profile-field">
+                                <label>New Password</label>
+                                <input type="password" id="newPass">
+                            </div>
+
+                            <div class="profile-field">
+                                <label>Confirm New Password</label>
+                                <input type="password" id="newPass2">
+                            </div>
+
+                            <div class="profile-actions" style="display:flex; gap:10px; justify-content:flex-end;">
+                                <button type="button" class="save-btn" onclick="changePassword()">Update Password</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+<script>
+  function backendBase() {
+    const ip = (localStorage.getItem("gv_server_ip") || "127.0.0.1").trim();
+    const port = (localStorage.getItem("gv_server_port") || "8766").trim();
+    return `http://${ip}:${port}`;
+  }
+
+  function gvToken() {
+    return (localStorage.getItem("gv_token") || "").trim();
+  }
+
+  function authHeaders(extra) {
+    const h = Object.assign({}, extra || {});
+    const t = gvToken();
+    if (t) h["Authorization"] = "Bearer " + t;
+    h["X-Client-ID"] = "GV-Electron";
+    return h;
+  }
+
+  function clearAuth() {
+    localStorage.removeItem("gv_logged_in");
+    localStorage.removeItem("gv_token");
+    localStorage.removeItem("gv_user_email");
+    localStorage.removeItem("gv_name");
+    localStorage.removeItem("gv_role");
+    localStorage.removeItem("gv_user_id");
+    localStorage.removeItem("gv_must_change_pw");
+  }
+
+  async function logout() {
+    try {
+      await fetch(`${backendBase()}/auth/logout`, {
+        method: "POST",
+        headers: authHeaders()
+      });
+    } catch {}
+    clearAuth();
+    window.location.replace("login.html");
+  }
+</script>
+
+<script>
+    const nameInput = document.getElementById("nameInput");
+    const emailInput = document.getElementById("emailInput");
+    const roleInput = document.getElementById("roleInput");
+    const actions = document.querySelector("#profileForm .profile-actions");
+
+    async function loadProfileFromBackend() {
+      try {
+        const res = await fetch(`${backendBase()}/auth/me`, {
+          method: "GET",
+          headers: authHeaders()
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data.detail || "Session invalid");
+
+        const u = data.user || {};
+
+        // Save profile locally
+        localStorage.setItem("gv_user_id", String(u.id || ""));
+        localStorage.setItem("gv_user_email", u.email || "");
+        localStorage.setItem("gv_name", u.full_name || "");
+        localStorage.setItem("gv_role", u.role || "");
+        localStorage.setItem("gv_must_change_pw", String(data.must_change_pw || 0));
+
+        // Fill UI
+        nameInput.value = u.full_name || "";
+        emailInput.value = u.email || "";
+        roleInput.value = u.role || "";
+
+        document.getElementById("profileName").textContent = nameInput.value || "User";
+        document.getElementById("profileRole").textContent = roleInput.value || "";
+
+        // ✅ Show Admin Tools only if admin
+        const roleLower = (u.role || "").toLowerCase();
+        const isAdmin = roleLower.includes("administrator") || roleLower === "admin";
+        document.getElementById("adminTools").style.display = isAdmin ? "block" : "none";
+
+        // ✅ Must change password warning (after admin reset)
+        if (Number(data.must_change_pw || 0) === 1) {
+          alert("Your password was reset by admin. Please change your password now.");
+        }
+      } catch (e) {
+        alert(e?.message || String(e));
+        clearAuth();
+        window.location.replace("login.html");
+      }
+    }
+
+    function toggleEdit() {
+        nameInput.disabled = false;
+        emailInput.disabled = false;
+        roleInput.disabled = false;
+        actions.style.display = "flex";
+    }
+
+    function cancelEdit() {
+        nameInput.disabled = true;
+        emailInput.disabled = true;
+        roleInput.disabled = true;
+        actions.style.display = "none";
+        loadProfileFromBackend();
+    }
+
+    async function saveProfile() {
+      try {
+        const payload = {
+          full_name: nameInput.value.trim(),
+          email: emailInput.value.trim(),
+          role: roleInput.value.trim()
+        };
+
+        const res = await fetch(`${backendBase()}/auth/profile`, {
+          method: "PUT",
+          headers: authHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data.detail || "Failed to save profile");
+
+        nameInput.disabled = true;
+        emailInput.disabled = true;
+        roleInput.disabled = true;
+        actions.style.display = "none";
+
+        await loadProfileFromBackend();
+        alert("Profile updated successfully!");
+      } catch (e) {
+        alert(e?.message || String(e));
+      }
+    }
+
+    async function changePassword() {
+      const cur = document.getElementById("curPass").value;
+      const np = document.getElementById("newPass").value;
+      const np2 = document.getElementById("newPass2").value;
+
+      if (!cur || !np || !np2) {
+        alert("Please fill all password fields.");
+        return;
+      }
+      if (np !== np2) {
+        alert("New password does not match confirmation.");
+        return;
+      }
+      if (np.length < 6) {
+        alert("New password must be at least 6 characters.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${backendBase()}/auth/change_password`, {
+          method: "PUT",
+          headers: authHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify({
+            current_password: cur,
+            new_password: np
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data.detail || "Failed to change password");
+
+        document.getElementById("curPass").value = "";
+        document.getElementById("newPass").value = "";
+        document.getElementById("newPass2").value = "";
+
+        // Clear local must-change flag
+        localStorage.setItem("gv_must_change_pw", "0");
+
+        alert("Password updated successfully!");
+      } catch (e) {
+        alert(e?.message || String(e));
+      }
+    }
+
+    loadProfileFromBackend();
+</script>
+
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const currentPage = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+        document.querySelectorAll("#sidebar .sidebar-link[href]").forEach(link => {
+          const href = (link.getAttribute("href") || "").toLowerCase();
+          if (href && href !== "#" && href === currentPage) {
+            link.classList.add("active");
+          }
+        });
+      });
+    </script>
+
+</body>
+</html>

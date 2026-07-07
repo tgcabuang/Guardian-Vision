@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guardian Vision</title>
+  <link rel="stylesheet" href="icons/lineicons/lineicons.css">
+  <link rel="stylesheet" href="settingsstyle.css">
+</head>
+
+<body class="loading">
+
+  <!-- Loader (will auto-hide on window load) -->
+  <div class="page-loader" id="pageLoader">
+    <div class="ring"></div>
+  </div>
+
+  <script>
+    if (localStorage.getItem("gv_logged_in") !== "true") {
+      window.location.replace("login.html");
+    }
+  </script>
+
+  <div class="container">
+    <aside id="sidebar">
+      <label for="toggler" class="toggle-btn">
+        <img src="image/GV_Logo_3.svg" alt="logo" class="logo">
+        <span>Guardian Vision</span>
+      </label>
+
+      <ul class="sidebar-nav">
+        <li class="sidebar-item">
+          <a href="index.html" class="sidebar-link">
+            <i class="lni lni-dashboard-square-1"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="records.html" class="sidebar-link">
+            <i class="lni lni-database-2"></i>
+            <span>Records</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="notifications.html" class="sidebar-link">
+            <i class="lni lni-bell-1"></i>
+            <span>Notifications</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="profile.html" class="sidebar-link">
+            <i class="lni lni-user-4"></i>
+            <span>Profile</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="settings.html" class="sidebar-link active">
+            <i class="lni lni-gear-1"></i>
+            <span>Settings</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <a href="#" class="sidebar-link" onclick="logout()">
+          <i class="lni lni-exit"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="dashboard-navbar">
+        <form action="#">
+          <div class="gv-header">
+            <a href="#"><h2>Settings</h2></a>
+          </div>
+        </form>
+
+        <div class="form-content">
+          <ul class="main-nav">
+            <li class="user-link">
+              <a href="#">
+                <img src="image/account.png" alt="Profile" class="avatar">
+              </a>
+              <div class="user-link-dropdown">
+                <a href="profile.html" class="dropdown-item">Profile</a>
+                <a href="#" class="dropdown-item" onclick="logout()">Logout</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="settings-container">
+
+          <!-- LEFT COLUMN -->
+          <div class="settings-left">
+
+            <!-- IP + Camera Sources -->
+            <div class="settings-card">
+              <h3><i class="lni lni-network"></i> IP Configuration</h3>
+
+              <div class="form-group">
+                <label>Server IP Address</label>
+                <input id="gvServerIp" type="text" placeholder="e.g. 127.0.0.1 or 192.168.1.10">
+              </div>
+
+              <div class="form-group">
+                <label>Port</label>
+                <input id="gvServerPort" type="number" placeholder="e.g. 8766">
+              </div>
+
+              <hr style="margin:18px 0; opacity:0.2;">
+
+              <h3 style="margin-top:0;"><i class="lni lni-camera"></i> Camera Sources</h3>
+
+              <div class="form-group">
+                <label>Camera 1 Source (RTSP / HTTP / Webcam index)</label>
+                <input id="gvCam1Url" type="text" placeholder='e.g. 0  |  rtsp://user:pass@ip:554/stream1  |  http://ip:4747/video'>
+              </div>
+
+              <div class="form-group">
+                <label>Camera 2 Source (leave blank to disable)</label>
+                <input id="gvCam2Url" type="text" placeholder='blank = OFF'>
+              </div>
+
+              <div class="form-group">
+                <label>Camera 3 Source (leave blank to disable)</label>
+                <input id="gvCam3Url" type="text" placeholder='blank = OFF'>
+              </div>
+
+              <button id="saveBtn" class="btn-primary">Save & Apply</button>
+              <div id="saveMsg" style="margin-top:10px; font-size:13px;"></div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN -->
+          <div class="settings-right">
+
+            <!-- Camera Status -->
+            <div class="settings-card">
+              <h3><i class="lni lni-camera"></i> Camera Connectivity</h3>
+
+              <div class="camera-status">
+                <div class="camera-row">
+                  <span>Camera 1</span>
+                  <span id="cam1Status" class="status disconnected">Disconnected</span>
+                </div>
+
+                <div class="camera-row">
+                  <span>Camera 2</span>
+                  <span id="cam2Status" class="status disconnected">Disconnected</span>
+                </div>
+
+                <div class="camera-row">
+                  <span>Camera 3</span>
+                  <span id="cam3Status" class="status disconnected">Disconnected</span>
+                </div>
+              </div>
+
+              <button id="refreshBtn" class="btn-secondary">Refresh Status</button>
+              <div id="statusMsg" style="margin-top:10px; font-size:13px;"></div>
+            </div>
+
+            <!-- Records Storage -->
+            <div class="settings-card">
+              <h3><i class="lni lni-folder"></i> Records Storage</h3>
+
+              <div class="form-group">
+                <label>Records Folder (backend will save Punching/Kicking here)</label>
+
+                <div class="records-row">
+                  <input id="gvRecordsDir" type="text" placeholder="Choose a folder..." readonly>
+                  <button id="pickRecordsBtn" class="btn-secondary" type="button">Browse</button>
+                  <button id="openRecordsBtn" class="btn-secondary" type="button">Open</button>
+                </div>
+
+                <div style="opacity:0.75; font-size:12px; margin-top:6px;">
+                  Changing this will restart the backend to apply the new folder.
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ Loader hide
+    window.addEventListener("load", () => {
+      const el = document.getElementById("pageLoader");
+      if (el) el.classList.add("hide");
+      document.body.classList.remove("loading");
+    });
+
+    function logout() {
+      localStorage.removeItem("gv_logged_in");
+      localStorage.removeItem("gv_user_email");
+      window.location.replace("login.html");
+    }
+  </script>
+
+  <script>
+    // -----------------------------
+    // Helpers
+    // -----------------------------
+    function backendBase() {
+      // ✅ These are the correct keys used by your app
+      const ip = (localStorage.getItem("gv_server_ip") || "127.0.0.1").trim();
+      const port = (localStorage.getItem("gv_server_port") || "8766").trim();
+      return `http://${ip}:${port}`;
+    }
+
+    function setMsg(el, msg, ok = true) {
+      if (!el) return;
+      el.textContent = msg;
+      el.style.color = ok ? "#2ecc71" : "#ff4d4d";
+    }
+
+    function parseSource(raw) {
+      const s = (raw || "").trim();
+      if (!s) return "";
+      if (/^\d+$/.test(s)) return Number(s);
+      return s;
+    }
+
+    async function postConfig(camIndex, rawSource) {
+      const source = parseSource(rawSource);
+      const res = await fetch(`${backendBase()}/config/cam${camIndex}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + (localStorage.getItem("gv_token") || ""),
+          "X-Client-ID": "GV-Electron"
+        },
+        body: JSON.stringify({ source })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error(data.error || `config cam${camIndex} failed`);
+      return data;
+    }
+
+    function setStatus(el, connected) {
+      if (!el) return;
+      el.textContent = connected ? "Connected" : "Disconnected";
+      el.classList.toggle("connected", !!connected);
+      el.classList.toggle("disconnected", !connected);
+    }
+
+    async function waitForBackendOnline(maxTries = 30, delayMs = 400) {
+      const token = localStorage.getItem("gv_token") || "";
+      for (let i = 0; i < maxTries; i++) {
+        try {
+          const res = await fetch(`${backendBase()}/status`, {
+            method: "GET",
+            headers: { "Authorization": "Bearer " + token, "X-Client-ID": "GV-Electron" }
+          });
+          if (res.ok) return true;
+        } catch (_) {}
+        await new Promise(r => setTimeout(r, delayMs));
+      }
+      throw new Error("Backend still offline after restart. Please re-open the app or start backend.");
+    }
+
+    async function refreshStatusUI() {
+      const res = await fetch(`${backendBase()}/status`, {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer " + (localStorage.getItem("gv_token") || ""),
+          "X-Client-ID": "GV-Electron"
+        }
+      });
+
+      if (res.status === 401) {
+        setMsg(document.getElementById("statusMsg"), "Unauthorized. Please login again.", false);
+        return;
+      }
+
+      const data = await res.json().catch(() => ({}));
+
+      const cam0 = data?.cam0 || {};
+      const cam1 = data?.cam1 || {};
+      const cam2 = data?.cam2 || {};
+
+      setStatus(document.getElementById("cam1Status"), !!cam0.connected);
+      setStatus(document.getElementById("cam2Status"), !!cam1.connected);
+      setStatus(document.getElementById("cam3Status"), !!cam2.connected);
+
+      const fps0 = cam0.fps != null ? Number(cam0.fps).toFixed(1) : "--";
+      const fps1 = cam1.fps != null ? Number(cam1.fps).toFixed(1) : "--";
+      const fps2 = cam2.fps != null ? Number(cam2.fps).toFixed(1) : "--";
+
+      setMsg(
+        document.getElementById("statusMsg"),
+        `Cam1: ${cam0.connected ? "OK" : "OFF"} (FPS ${fps0}) | Cam2: ${cam1.connected ? "OK" : "OFF"} (FPS ${fps1}) | Cam3: ${cam2.connected ? "OK" : "OFF"} (FPS ${fps2})`,
+        true
+      );
+    }
+
+    // -----------------------------
+    // Bind inputs
+    // -----------------------------
+    const ipInput   = document.getElementById("gvServerIp");
+    const portInput = document.getElementById("gvServerPort");
+    const cam1Input = document.getElementById("gvCam1Url");
+    const cam2Input = document.getElementById("gvCam2Url");
+    const cam3Input = document.getElementById("gvCam3Url");
+
+    const recordsDirInput = document.getElementById("gvRecordsDir");
+    const pickRecordsBtn  = document.getElementById("pickRecordsBtn");
+    const openRecordsBtn  = document.getElementById("openRecordsBtn");
+
+    const saveMsg   = document.getElementById("saveMsg");
+
+    async function loadSaved() {
+      ipInput.value   = localStorage.getItem("gv_server_ip") || "127.0.0.1";
+      portInput.value = localStorage.getItem("gv_server_port") || "8766";
+      cam1Input.value = localStorage.getItem("gv_cam1_url") || "";
+      cam2Input.value = localStorage.getItem("gv_cam2_url") || "";
+      cam3Input.value = localStorage.getItem("gv_cam3_url") || "";
+
+      try {
+        const res = await window.api.getConfig();
+        recordsDirInput.value = (res?.config?.recordsDir || "").trim();
+      } catch {
+        recordsDirInput.value = (localStorage.getItem("gv_records_dir") || "").trim();
+      }
+    }
+    loadSaved();
+
+    pickRecordsBtn?.addEventListener("click", async () => {
+      try {
+        const r = await window.api.pickRecordsDir();
+        if (!r?.ok) throw new Error(r?.error || "pick_failed");
+        if (!r.dir) return;
+
+        recordsDirInput.value = r.dir;
+        setMsg(saveMsg, "Saving Records folder... Restarting backend...", true);
+
+        const apply = await window.api.setRecordsDir(r.dir);
+        if (!apply?.ok) throw new Error(apply?.error || "apply_failed");
+
+        localStorage.setItem("gv_records_dir", r.dir);
+
+        await waitForBackendOnline();
+        await refreshStatusUI();
+
+        setMsg(saveMsg, "Records folder saved. Backend is online.", true);
+      } catch (e) {
+        console.error(e);
+        setMsg(saveMsg, `Failed to set Records folder: ${e.message}`, false);
+      }
+    });
+
+    openRecordsBtn?.addEventListener("click", async () => {
+      const dir = (recordsDirInput.value || "").trim();
+      if (!dir) {
+        setMsg(saveMsg, "No Records folder selected.", false);
+        return;
+      }
+      const r = await window.api.openPath(dir);
+      if (!r?.ok) setMsg(saveMsg, `Open failed: ${r?.error || "unknown"}`, false);
+    });
+
+    document.getElementById("saveBtn")?.addEventListener("click", async () => {
+      const ip = (ipInput.value || "").trim();
+      const port = (portInput.value || "").trim();
+
+      if (!ip || !port) {
+        setMsg(saveMsg, "Please enter Server IP and Port.", false);
+        return;
+      }
+
+      // ✅ These are the keys Records should read
+      localStorage.setItem("gv_server_ip", ip);
+      localStorage.setItem("gv_server_port", port);
+
+      localStorage.setItem("gv_cam1_url", (cam1Input.value || "").trim());
+      localStorage.setItem("gv_cam2_url", (cam2Input.value || "").trim());
+      localStorage.setItem("gv_cam3_url", (cam3Input.value || "").trim());
+
+      try {
+        await postConfig(0, cam1Input.value);
+        await postConfig(1, cam2Input.value);
+        await postConfig(2, cam3Input.value);
+
+        setMsg(saveMsg, "Saved & applied to backend successfully.", true);
+        await refreshStatusUI();
+      } catch (e) {
+        console.error(e);
+        setMsg(saveMsg, `Failed to apply: ${e.message}`, false);
+      }
+    });
+
+    document.getElementById("refreshBtn")?.addEventListener("click", async () => {
+      try {
+        await refreshStatusUI();
+      } catch (e) {
+        console.error(e);
+        setMsg(document.getElementById("statusMsg"), `Failed to reach backend: ${e.message}`, false);
+      }
+    });
+
+    refreshStatusUI().catch(() => {});
+  </script>
+
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const currentPage = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+        document.querySelectorAll("#sidebar .sidebar-link[href]").forEach(link => {
+          const href = (link.getAttribute("href") || "").toLowerCase();
+          if (href && href !== "#" && href === currentPage) {
+            link.classList.add("active");
+          }
+        });
+      });
+    </script>
+
+</body>
+</html>
