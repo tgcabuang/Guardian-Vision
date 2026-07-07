@@ -8,7 +8,7 @@ backend/assets/
 
 | File | Description | Source |
 |------|-------------|--------|
-| `class_map.json` | Maps action class IDs to their corresponding labels. You can edit it if you want other actions to be included | Included in this repository. |
+| `class_map.json` | Maps action class IDs to their corresponding labels. You can edit it if you want other actions to be included. | Included in this repository. |
 | `ctrgcn_bundle.pth` | Trained CTR-GCN model for action recognition. | Generate by training the model using `builder_trainer/training_with_cctv_aug.py`. |
 | `norm_stats_coco17_2d_T36_M1.pkl` | Normalization statistics required during inference. | Generate by running `builder_trainer/dataset_builder_combine_recommended.py`. |
 | `rtmpose.pth` | RTMPose pretrained checkpoint for pose estimation. | Download from the official MMPose repository and rename to `rtmpose.pth`. |
