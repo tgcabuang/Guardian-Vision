@@ -40,7 +40,7 @@ Access to the dataset was obtained through the official request process provided
 
 ### Backend
 - Python
-- FastAPI (or Flask, whichever you actually use)
+- FastAPI
 - OpenCV
 
 ### Artificial Intelligence
