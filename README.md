@@ -9,6 +9,14 @@ Guardian Vision is a desktop-based intelligent surveillance system developed as 
 
 The system is designed to assist in safety monitoring by recognizing predefined human actions through deep learning and computer vision techniques and notify personnel for violent actions.
 
+There are 6 actions in the model:
+1. Chest Pain
+2. Falling down
+3. Punching
+4. Kicking
+5. Walking
+6. Running
+
 
 ## Dataset
 
@@ -22,6 +30,21 @@ Access to the dataset was obtained through the official request process provided
 > **Source:** https://rose1.ntu.edu.sg/dataset/actionRecognition/
 
 **Please note:** The dataset is **not included** in this repository due to its size and the dataset's distribution policy. Researchers and developers wishing to use the dataset should request access directly from the official website.
+
+
+## Model Weights
+
+Trained model weights (`.pth` and `.pt`) are **not included** in this repository.
+
+After training the models using the scripts in the `builder and trainer/` directory, place the generated weight files in the backend directory before running the application.
+
+Required model files include, but are not limited to:
+
+- `ctrgcn_bundle.pth`
+- `rtmpose.pth`
+- `yolov8n.pt`
+
+Please refer to the project documentation or configuration files for the expected file locations.
 
 
 ## Screenshots of APP
