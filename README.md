@@ -47,7 +47,7 @@ Access to the dataset was obtained through the official request process provided
 
 Trained model weights (`.pth` and `.pt`) are **not included** in this repository.
 
-After training the models using the scripts in the `builder and trainer/` directory, place the generated weight files in the `backend/assets` directory before running the application.
+After training the models using the scripts in the `builder_trainer/` directory, place the generated weight files in the `backend/assets` directory before running the application.
 
 Required model files include, but are not limited to:
 
@@ -97,7 +97,7 @@ These filenames contain metadata used during preprocessing and training.
 Run the dataset builder to preprocess the videos and generate the required training files.
 
 ```bash
-python dataset-builder/<builder_script>.py
+python builder_trainer /dataset_builder_combine_recommended.py
 ```
 
 The dataset builder will:
