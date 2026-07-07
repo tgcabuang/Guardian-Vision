@@ -1,7 +1,8 @@
 # Guardian-Vision
 Design of a Gesture-based Video Surveillance System for Post-investigation Analysis
  - An AI-powered real-time human activity recognition and monitoring system using computer vision and deep learning.
- - 
+
+
 ## Overview
 
 Guardian Vision is a desktop-based intelligent surveillance system developed as a bachelor's capstone project. It combines person detection, pose estimation, and skeleton-based action recognition to monitor human activities in almost real time.
