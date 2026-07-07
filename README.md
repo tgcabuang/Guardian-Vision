@@ -148,7 +148,7 @@ Training will generate the model weights (`.pth`) that are required by Guardian 
 
 ## Using the Trained Model
 
-After training is complete, place the generated model weights in the appropriate directory used by the application.
+After training is complete, place the generated model weights in the `backend/assets` directory used by the application.
 
 The application will automatically load the trained model during inference.
 
