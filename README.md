@@ -48,6 +48,9 @@ Access to the dataset was obtained through the official request process provided
 - RTMPose
 - CTR-GCN
 
+### App Compilation
+- Inno Setup
+
 
 ## Development Environment
 
@@ -58,8 +61,15 @@ Access to the dataset was obtained through the official request process provided
 | PyTorch | 2.1.0 |
 | CUDA | 11.8 |
 | MMCV | 2.1.0 |
+| MMDetection | 3.2.0 |
+| MMPose | 1.3.2 |
 
+## Laptop Specs Used and Its FPS:
+| CPU | Ryzen 7 5800H with Radeon Graphics|
+| GPU | NVIDIA GeForce RTX 3050 Ti |
 
+| 1 CAM | 2 CAMS | 3 CAMS |
+| 15 Fps | 10 Fps | 5 Fps |
 
 ## Installation
 
@@ -76,8 +86,3 @@ mim install mmcv
 For additional installation instructions, refer to the official MMCV documentation:
 https://mmcv.readthedocs.io/en/latest/get_started/installation.html
 
-
-
-| MMDetection | 3.2.0 |
-| MMPose | 1.3.2 |
-| GPU | NVIDIA GeForce RTX 3050 Ti Laptop GPU |
