@@ -77,6 +77,7 @@ Access to the dataset was obtained through the official request process provided
 
 ### Clone the repository
 
+```bash
 git clone https://github.com/yourusername/Guardian-Vision.git
 cd Guardian-Vision
 
