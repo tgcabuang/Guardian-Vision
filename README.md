@@ -66,9 +66,11 @@ Access to the dataset was obtained through the official request process provided
 
 ## Laptop Specs Used and Its FPS:
 | CPU | Ryzen 7 5800H with Radeon Graphics|
+|-----------|---------|
 | GPU | NVIDIA GeForce RTX 3050 Ti |
 
 | 1 CAM | 2 CAMS | 3 CAMS |
+|-----------|---------|
 | 15 Fps | 10 Fps | 5 Fps |
 
 ## Installation
