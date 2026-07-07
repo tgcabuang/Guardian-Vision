@@ -47,7 +47,7 @@ Access to the dataset was obtained through the official request process provided
 
 Trained model weights (`.pth` and `.pt`) are **not included** in this repository.
 
-After training the models using the scripts in the `builder and trainer/` directory, place the generated weight files in the backend directory before running the application.
+After training the models using the scripts in the `builder and trainer/` directory, place the generated weight files in the `backend/assets` directory before running the application.
 
 Required model files include, but are not limited to:
 
