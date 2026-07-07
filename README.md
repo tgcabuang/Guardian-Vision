@@ -9,13 +9,24 @@ Guardian Vision is a desktop-based intelligent surveillance system developed as 
 
 The system is designed to assist in safety monitoring by recognizing predefined human actions through deep learning and computer vision techniques and notify personnel for violent actions.
 
-There are 6 actions in the model:
-1. Chest Pain
-2. Falling down
-3. Punching
-4. Kicking
-5. Walking
-6. Running
+## Installation
+
+For additional installation instructions, refer to the official MMCV documentation:
+https://mmcv.readthedocs.io/en/latest/get_started/installation.html
+
+## Application
+
+### Clone the repository
+
+```bash
+git clone https://github.com/yourusername/Guardian-Vision.git
+cd Guardian-Vision
+
+npm install
+pip install -r requirements.txt
+pip install -U openmim
+mim install mmcv
+```
 
 
 ## Dataset
@@ -45,6 +56,84 @@ Required model files include, but are not limited to:
 - `yolov8n.pt`
 
 Please refer to the project documentation or configuration files for the expected file locations.
+
+# Dataset Builder and Model Training
+
+## Prerequisites
+
+This repository **does not include** the NTU RGB+D 60 & 120 datasets.
+
+Before training the model, you must first obtain the dataset by requesting access through the official website:
+
+https://rose1.ntu.edu.sg/dataset/actionRecognition/
+
+Please ensure that your use of the dataset complies with the dataset's terms and conditions.
+
+---
+
+## Preparing the Dataset
+
+After downloading the NTU RGB+D dataset:
+
+1. Extract the dataset.
+2. Copy the required video files into the dataset directory used by the dataset builder.
+3. **Do not rename the videos.**
+
+The dataset builder expects the **original NTU RGB+D filenames**, for example:
+
+```text
+S001C001P001R001A001.mp4
+S001C001P001R001A002.mp4
+S001C001P001R001A003.mp4
+...
+```
+
+These filenames contain metadata used during preprocessing and training.
+
+---
+
+## Building the Dataset
+
+Run the dataset builder to preprocess the videos and generate the required training files.
+
+```bash
+python dataset-builder/<builder_script>.py
+```
+
+The dataset builder will:
+
+- Read the NTU RGB+D videos
+- Extract the required information
+- Generate the dataset format required for training
+
+---
+
+## Training the Model
+
+After the dataset has been prepared, train the action recognition model:
+
+```bash
+python trainer/<training_script>.py
+```
+
+Training will generate the model weights (`.pth`) that are required by Guardian Vision.
+
+---
+
+## Using the Trained Model
+
+After training is complete, place the generated model weights in the appropriate directory used by the application.
+
+The application will automatically load the trained model during inference.
+
+---
+
+## Notes
+
+- The NTU RGB+D dataset is **not distributed** with this repository.
+- Users must obtain the dataset directly from the dataset authors.
+- The original dataset filenames should be preserved during preprocessing.
+- This repository provides only the tools required to prepare the dataset and train the model.
 
 
 ## Screenshots of APP
@@ -96,19 +185,6 @@ Please refer to the project documentation or configuration files for the expecte
 |-----------|---------|---------|
 | 15 Fps | 10 Fps | 5 Fps |
 
-## Installation
 
-### Clone the repository
 
-```bash
-git clone https://github.com/yourusername/Guardian-Vision.git
-cd Guardian-Vision
-
-npm install
-pip install -r requirements.txt
-pip install -U openmim
-mim install mmcv
-
-For additional installation instructions, refer to the official MMCV documentation:
-https://mmcv.readthedocs.io/en/latest/get_started/installation.html
 
