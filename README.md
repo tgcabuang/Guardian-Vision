@@ -163,7 +163,7 @@ The application will automatically load the trained model during inference.
 
 
 ## Screenshots of APP
-<img width="914" height="516" alt="image" src="https://github.com/user-attachments/assets/81a3f8d9-4aa9-4571-a9e8-67c54749ae0a" />
+<img width="1341" height="718" alt="image" src="https://github.com/user-attachments/assets/79196baf-a7a9-4c0d-8b71-d4f8cd0d5d1a" />
 <img width="920" height="575" alt="image" src="https://github.com/user-attachments/assets/cec0c093-7b57-447a-88fb-80de28afcfbd" />
 <img width="919" height="517" alt="image" src="https://github.com/user-attachments/assets/2dbaa225-08ff-4e95-84d8-a2f0de3a6599" />
 
