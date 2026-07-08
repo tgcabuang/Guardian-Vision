@@ -28,6 +28,7 @@ builder_trainer/
 ├── ctrgcn_model.py
 ├── dataset_builder_combine_recommended.py
 ├── training_with_cctv_aug.py
+├── yolov8n.pt
 └── README.md
 ```
 
