@@ -39,7 +39,7 @@ try:
     SKLEARN_OK = True
 except Exception as e:
     SKLEARN_OK = False
-    print("⚠️ scikit-learn is optional (classification report).")
+    print("   Scikit-learn is optional (classification report).")
     print("   Install: pip install scikit-learn")
     print("   Error:", repr(e))
 
