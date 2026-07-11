@@ -164,9 +164,10 @@ The application will automatically load the trained model during inference.
 
 ## To run the application
 
-### Make sure all the files and scripts are on the folder. And run this in the terminal.
+### Make sure all the files and scripts are on the folder. And run these in the terminal.
 
 ```bash
+./backend/server_ws.py
 npm run electron
 ```
 
