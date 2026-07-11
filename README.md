@@ -162,6 +162,15 @@ The application will automatically load the trained model during inference.
 - This repository provides only the tools required to prepare the dataset and train the model.
 
 
+## To run the application
+
+### Make sure all the files and scripts are on the folder. And run this in the terminal.
+
+```bash
+npm run electron
+```
+
+
 ## Screenshots of APP
 <img width="1341" height="718" alt="image" src="https://github.com/user-attachments/assets/79196baf-a7a9-4c0d-8b71-d4f8cd0d5d1a" />
 <img width="920" height="575" alt="image" src="https://github.com/user-attachments/assets/cec0c093-7b57-447a-88fb-80de28afcfbd" />
