@@ -4,7 +4,7 @@
 #define MyAppExeName "Guardian Vision.exe"
 
 [Setup]
-AppId={{9B2C4D6E-3456-4F8A-ABCD-123456789333}
+AppId={{9B2C4D6E-3456-4F8A-ABCD-123456789223}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
